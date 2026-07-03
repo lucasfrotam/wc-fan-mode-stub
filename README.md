@@ -49,7 +49,8 @@ This stub fills the gap **without cloning either UI** — it borrows Tipmaster's
 - **Share link** — URL params + localStorage persist state (`?nation=germany&cupRun=weekday_late&raceWeeks=8`)
 - **Copy plan as markdown** — portable output for coaches / Notion
 - **Integration roadmap** — 5-phase production path with Tipmaster cross-sell
-- **PWA manifest** + **OG social card** for link previews
+- **AI Consensus Coaching** — dual coach debate + synthesis (mirrors AiTrainingPlan's two-model workflow)
+- **Chart tooltips** — hover TSB values, form labels, match-night ATL spikes
 
 ---
 

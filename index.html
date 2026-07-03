@@ -177,6 +177,24 @@
     @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
     button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .ver { font-size: .68rem; color: #4a5d70; margin-top: 6px; }
+    .consensus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+    @media (max-width: 560px) { .consensus-grid { grid-template-columns: 1fr; } }
+    .coach {
+      background: var(--card2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px; font-size: .82rem; line-height: 1.5; cursor: pointer; transition: border-color .2s, background .2s;
+    }
+    .coach:hover { border-color: rgba(45,212,191,.4); }
+    .coach.selected { border-color: var(--accent); background: rgba(45,212,191,.06); }
+    .coach .coach-name { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+    .coach.conservative .coach-name { color: var(--ok); }
+    .coach.aggressive .coach-name { color: var(--warn); }
+    .coach q { display: block; color: #b8c9d9; font-style: italic; }
+    .synthesis {
+      margin-top: 12px; padding: 12px; border-radius: 8px;
+      background: rgba(45,212,191,.06); border: 1px solid rgba(45,212,191,.2);
+      font-size: .84rem; color: #c5d5e3;
+    }
+    .synthesis strong { color: var(--accent); }
   </style>
 </head>
 <body>
@@ -274,6 +292,13 @@
         <div id="plan"></div>
       </div>
 
+      <div class="card" id="consensusCard">
+        <h2 data-i18n="consensus_title">AI Consensus Coaching</h2>
+        <p style="font-size:.84rem;color:var(--muted);margin-bottom:4px" data-i18n="consensus_desc">Two independent coaches debate your plan — mirrors AiTrainingPlan's dual-model workflow. Click to pick your stance.</p>
+        <div class="consensus-grid" id="consensusGrid"></div>
+        <div class="synthesis" id="consensusSynth"></div>
+      </div>
+
       <div class="card">
         <h2 data-i18n="halftime_title">Halftime protocol (12 min)</h2>
         <div class="plan-item">
@@ -317,7 +342,7 @@
       <a href="https://tipmaster.de/world-cup/" target="_blank" rel="noopener">tipmaster.de World Cup</a> ·
       <a href="https://github.com/lucasfrotam/wc-fan-mode-stub" target="_blank" rel="noopener">GitHub</a> ·
       <a href="https://github.com/lucasfrotam/wc-fan-mode-stub#readme" target="_blank" rel="noopener">README</a>
-      <div class="ver">v1.3 · single-file · no build step · Lucas Marinho · WTF Assessment 2026</div>
+      <div class="ver">v1.4 · agentic co-build · Lucas Marinho · WTF Assessment 2026</div>
     </footer>
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -340,7 +365,10 @@
         btn_copy: 'Copy prompt', copied: 'Copied ✓',
         btn_share: 'Copy share link', btn_copy_plan: 'Copy plan as markdown',
         compare_title: 'Who does what', roadmap_title: 'Integration roadmap (if shipped to production)',
-        toast_share: 'Share link copied', toast_plan: 'Plan copied', toast_prompt: 'Prompt copied'
+        toast_share: 'Share link copied', toast_plan: 'Plan copied', toast_prompt: 'Prompt copied',
+        consensus_title: 'AI Consensus Coaching',
+        consensus_desc: 'Two independent coaches debate your plan — mirrors AiTrainingPlan\'s dual-model workflow. Click to pick your stance.',
+        coach_a: 'Coach A — Conservative', coach_b: 'Coach B — Aggressive', synth_label: 'Synthesis'
       },
       de: {
         title: 'WM-Fan-Modus',
@@ -358,7 +386,10 @@
         btn_copy: 'Prompt kopieren', copied: 'Kopiert ✓',
         btn_share: 'Link teilen', btn_copy_plan: 'Plan als Markdown',
         compare_title: 'Wer macht was', roadmap_title: 'Integrations-Roadmap (Produktion)',
-        toast_share: 'Link kopiert', toast_plan: 'Plan kopiert', toast_prompt: 'Prompt kopiert'
+        toast_share: 'Link kopiert', toast_plan: 'Plan kopiert', toast_prompt: 'Prompt kopiert',
+        consensus_title: 'AI-Konsens-Coaching',
+        consensus_desc: 'Zwei Coaches debattieren deinen Plan — wie im AiTrainingPlan-Dual-Model-Workflow.',
+        coach_a: 'Coach A — Konservativ', coach_b: 'Coach B — Aggressiv', synth_label: 'Synthese'
       }
     };
 
@@ -703,6 +734,54 @@ RULES:
 Refine this plan for my actual Garmin/Strava data. Ask me for this week's CTL, ATL, and sleep avg before changing anything.`;
     }
 
+    function buildConsensus(r, match, raceWeeks) {
+      const conservative = {
+        weekday_early: 'Keep the Wednesday intervals but cut to 5×3′. TSB −10 is manageable — don\'t chase CTL this week.',
+        weekday_late: 'Skip Saturday 5k entirely. ATL +14 with poor sleep needs 48h Z1 before any quality. Long run Sunday only if HRV green.',
+        weekend: 'No changes needed. Maintain Sunday long run volume — match fatigue is psychological, not physiological.',
+        knockout: 'Full deload. Zero key sessions until ACWR drops below 1.2. One walk per day max until knockout ends.'
+      }[match];
+
+      const aggressive = {
+        weekday_early: 'Move VO2 to Tuesday AM before match adrenaline. You can absorb ATL +8 — add 6×200m strides Friday.',
+        weekday_late: 'Keep Saturday 5k as fitness test. Late kickoffs hurt sleep, not legs — maintain CTL with Thursday bike.',
+        weekend: 'Add Friday tempo 20′. Weekend matches are recovery days — bank fitness Mon–Fri instead.',
+        knockout: 'One key session at −3d is fine if ACWR was 1.1 entering the week. Protect Tuesday intervals, deload everything else.'
+      }[match];
+
+      let synth = `Split the difference: honor sleep debt (${r.injury} injury risk) but keep exactly one neuromuscular touchpoint this week.`;
+      if (r.acwr > 1.3) synth = 'Consensus: conservative wins. ACWR > 1.3 — no quality sessions until ratio drops. Halftime mobility only.';
+      else if (raceWeeks < 6) synth = `A-race in ${raceWeeks} weeks — prioritize TSB recovery over CTL maintenance. One key session max.`;
+      else if (r.injury === 'Low') synth = 'Low injury risk — conservative on volume, aggressive on timing: train AM, watch PM, never both stressed same day.';
+
+      return { conservative, aggressive, synth };
+    }
+
+    function renderConsensus(r, match, raceWeeks) {
+      const c = buildConsensus(r, match, raceWeeks);
+      const grid = document.getElementById('consensusGrid');
+      grid.innerHTML = `
+        <div class="coach conservative" data-coach="a" tabindex="0">
+          <div class="coach-name">${I18N[lang].coach_a}</div>
+          <q>${c.conservative}</q>
+        </div>
+        <div class="coach aggressive" data-coach="b" tabindex="0">
+          <div class="coach-name">${I18N[lang].coach_b}</div>
+          <q>${c.aggressive}</q>
+        </div>`;
+      document.getElementById('consensusSynth').innerHTML =
+        `<strong>${I18N[lang].synth_label}:</strong> ${c.synth}`;
+
+      grid.querySelectorAll('.coach').forEach(el => {
+        const pick = () => {
+          grid.querySelectorAll('.coach').forEach(x => x.classList.remove('selected'));
+          el.classList.add('selected');
+        };
+        el.addEventListener('click', pick);
+        el.addEventListener('keydown', e => { if (e.key === 'Enter') pick(); });
+      });
+    }
+
     function runGenerate(scroll = true) {
       const match = document.getElementById('cupRun').value;
       const nation = document.getElementById('nation').selectedOptions[0].text;
@@ -740,6 +819,7 @@ Refine this plan for my actual Garmin/Strava data. Ask me for this week's CTL, A
         </div>`).join('');
 
       document.getElementById('aiPrompt').value = buildPrompt(nation, match, r, plan, raceWeeks);
+      renderConsensus(r, match, raceWeeks);
       document.getElementById('output').classList.remove('hidden');
       lastState = { nation, match, r, plan, raceWeeks };
 
