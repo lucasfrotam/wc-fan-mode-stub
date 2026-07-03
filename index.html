@@ -66,30 +66,48 @@
     @media (min-width: 640px) { .wrap { padding: 24px 20px calc(64px + var(--safe-b)); } }
 
     /* entrance animations */
-    .animate-in { animation: fadeUp .6s var(--ease-out) both; }
-    .animate-in-d1 { animation-delay: .08s; }
-    .animate-in-d2 { animation-delay: .16s; }
-    .animate-in-d3 { animation-delay: .24s; }
-    .animate-in-d4 { animation-delay: .32s; }
+    .animate-in { animation: fadeUp .75s var(--ease-out) both; }
+    .animate-in-d1 { animation-delay: .1s; }
+    .animate-in-d2 { animation-delay: .2s; }
+    .animate-in-d3 { animation-delay: .3s; }
+    .animate-in-d4 { animation-delay: .4s; }
+    .animate-in-d5 { animation-delay: .5s; }
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(18px); }
+      from { opacity: 0; transform: translateY(28px); }
       to   { opacity: 1; transform: none; }
     }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes scaleIn {
-      from { opacity: 0; transform: scale(.92); }
+      from { opacity: 0; transform: scale(.88); }
       to   { opacity: 1; transform: scale(1); }
+    }
+    @keyframes revealCard {
+      from { opacity: 0; transform: translateY(32px) scale(.96); }
+      to   { opacity: 1; transform: none; }
+    }
+    @keyframes slideInItem {
+      from { opacity: 0; transform: translateX(-14px); }
+      to   { opacity: 1; transform: none; }
+    }
+    @keyframes popIn {
+      0%   { opacity: 0; transform: scale(.7); }
+      70%  { transform: scale(1.06); }
+      100% { opacity: 1; transform: scale(1); }
     }
     @keyframes shimmer {
       0%   { background-position: 200% center; }
       100% { background-position: -200% center; }
     }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
     @keyframes slideBar { from { width: 0; } }
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 0 rgba(45,212,191,0); }
+      50%      { box-shadow: 0 0 20px rgba(45,212,191,.12); }
+    }
 
     .topbar {
       display: flex; justify-content: space-between; align-items: center;
       margin-bottom: 18px; gap: 10px; flex-wrap: wrap;
+      animation: fadeUp .7s var(--ease-out) both;
     }
     .badge {
       font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
@@ -123,8 +141,12 @@
       background: linear-gradient(135deg, rgba(45,212,191,.08), rgba(20,184,166,.03));
       border: 1px solid rgba(45,212,191,.22); font-size: .88rem; color: #b8c9d9;
       transition: border-color .3s, box-shadow .3s;
+      animation: glowPulse 3s ease-in-out 1s 2;
     }
-    .why:hover { border-color: rgba(45,212,191,.35); box-shadow: 0 4px 24px rgba(45,212,191,.06); }
+    @media (hover: hover) {
+      .why:hover { border-color: rgba(45,212,191,.35); box-shadow: 0 4px 24px rgba(45,212,191,.06); }
+      .card:hover { border-color: rgba(45,212,191,.25); box-shadow: 0 8px 32px rgba(0,0,0,.25); }
+    }
     .why strong { color: var(--accent); }
 
     .card {
@@ -133,7 +155,6 @@
       transition: border-color .25s, box-shadow .25s, transform .25s var(--ease-out);
       width: 100%; max-width: 100%; min-width: 0; overflow: hidden;
     }
-    .card:hover { border-color: rgba(45,212,191,.25); box-shadow: 0 8px 32px rgba(0,0,0,.25); }
     .card h2 {
       font-size: .76rem; text-transform: uppercase; letter-spacing: .08em;
       color: var(--muted); margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
@@ -188,6 +209,14 @@
     .custom-select.open .custom-select-menu {
       opacity: 1; transform: none; pointer-events: auto;
     }
+    .custom-select.open .custom-select-option {
+      animation: slideInItem .35s var(--ease-out) both;
+    }
+    .custom-select.open .custom-select-option:nth-child(1) { animation-delay: .03s; }
+    .custom-select.open .custom-select-option:nth-child(2) { animation-delay: .06s; }
+    .custom-select.open .custom-select-option:nth-child(3) { animation-delay: .09s; }
+    .custom-select.open .custom-select-option:nth-child(4) { animation-delay: .12s; }
+    .custom-select.open .custom-select-option:nth-child(5) { animation-delay: .15s; }
     .custom-select-option {
       padding: 11px 12px; border-radius: 8px; font-size: .9rem;
       color: var(--text); cursor: pointer; transition: background .15s, color .15s;
@@ -310,7 +339,7 @@
       background: var(--card2); color: var(--text); border: 1px solid var(--border); flex: 0 1 auto;
     }
     .btn-secondary:hover { border-color: rgba(45,212,191,.4); background: rgba(45,212,191,.05); }
-    .btn-secondary.copied { border-color: var(--ok); color: var(--ok); animation: scaleIn .3s var(--ease-spring); }
+    .btn-secondary.copied { border-color: var(--ok); color: var(--ok); animation: popIn .35s var(--ease-spring); }
 
     .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 4px; }
     @media (max-width: 480px) { .metrics { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
@@ -323,7 +352,9 @@
     .metric:nth-child(2) { animation-delay: .1s; }
     .metric:nth-child(3) { animation-delay: .15s; }
     .metric:nth-child(4) { animation-delay: .2s; }
-    .metric:hover { transform: translateY(-2px); border-color: rgba(45,212,191,.3); }
+    @media (hover: hover) {
+      .metric:hover { transform: translateY(-2px); border-color: rgba(45,212,191,.3); }
+    }
     .metric .val { font-size: clamp(1.2rem, 4vw, 1.4rem); font-weight: 800; font-variant-numeric: tabular-nums; transition: color .3s; }
     .metric .lbl { font-size: .63rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-top: 3px; }
     .metric.warn .val { color: var(--warn); }
@@ -382,10 +413,14 @@
     }
     .plan-item {
       display: flex; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--border);
-      align-items: flex-start; animation: fadeUp .4s var(--ease-out) both;
-      transition: background .2s; border-radius: 8px; margin: 0 -6px; padding-left: 6px; padding-right: 6px;
+      align-items: flex-start;
+      transition: background .25s, transform .25s var(--ease-out);
+      border-radius: 8px; margin: 0 -6px; padding-left: 6px; padding-right: 6px;
     }
-    .plan-item:hover { background: rgba(45,212,191,.03); }
+    #output.reveal .plan-item { animation: slideInItem .45s var(--ease-out) both; }
+    @media (hover: hover) {
+      .plan-item:hover { background: rgba(45,212,191,.04); transform: translateX(4px); }
+    }
     .plan-item:last-child { border-bottom: none; }
     .plan-day {
       font-weight: 700; min-width: 48px; font-size: .8rem; color: var(--accent);
@@ -440,7 +475,13 @@
       .cmp-row {
         background: var(--card2); border: 1px solid var(--border); border-radius: 10px;
         padding: 10px 12px;
+        animation: fadeUp .5s var(--ease-out) both;
       }
+      .cmp-row:nth-child(1) { animation-delay: .05s; }
+      .cmp-row:nth-child(2) { animation-delay: .1s; }
+      .cmp-row:nth-child(3) { animation-delay: .15s; }
+      .cmp-row:nth-child(4) { animation-delay: .2s; }
+      .cmp-row:nth-child(5) { animation-delay: .25s; }
       .cmp-row .cmp-label { font-size: .72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
       .cmp-cols { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; font-size: .72rem; }
       .cmp-col-head { color: var(--muted); font-size: .65rem; text-transform: uppercase; margin-bottom: 2px; }
@@ -456,23 +497,52 @@
     details.roadmap {
       background: var(--card); border: 1px solid var(--border); border-radius: 16px;
       padding: clamp(16px, 4vw, 22px); margin-bottom: 14px;
-      transition: border-color .25s;
+      transition: border-color .35s var(--ease-out), box-shadow .35s var(--ease-out);
+      overflow: hidden;
     }
-    details.roadmap[open] { border-color: rgba(45,212,191,.25); }
+    details.roadmap[open] {
+      border-color: rgba(45,212,191,.3);
+      box-shadow: 0 8px 32px rgba(45,212,191,.06);
+    }
     details.roadmap summary {
       cursor: pointer; font-size: .76rem; text-transform: uppercase; letter-spacing: .07em;
       color: var(--muted); font-weight: 600; list-style: none; display: flex;
       align-items: center; gap: 8px; min-height: 44px; user-select: none;
+      transition: color .25s;
     }
-    details.roadmap summary::before { content: ""; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+    details.roadmap[open] summary { color: var(--accent); }
+    details.roadmap summary::before {
+      content: ""; width: 3px; height: 14px; background: var(--accent); border-radius: 2px;
+      transition: height .3s var(--ease-out), box-shadow .3s;
+    }
+    details.roadmap[open] summary::before {
+      height: 18px; box-shadow: 0 0 10px rgba(45,212,191,.5);
+    }
     details.roadmap summary::after {
       content: "▾"; margin-left: auto; color: var(--accent);
-      transition: transform .25s var(--ease-out);
+      transition: transform .4s var(--ease-spring);
     }
     details.roadmap[open] summary::after { transform: rotate(180deg); }
-    details.roadmap[open] .roadmap ol { animation: fadeUp .35s var(--ease-out) both; }
-    .roadmap ol { margin: 14px 0 0 18px; font-size: .85rem; color: #a8bccf; }
-    .roadmap li { margin-bottom: 10px; line-height: 1.5; }
+    details.roadmap .roadmap-body {
+      display: grid; grid-template-rows: 0fr;
+      transition: grid-template-rows .45s var(--ease-out);
+    }
+    details.roadmap[open] .roadmap-body { grid-template-rows: 1fr; }
+    details.roadmap .roadmap-inner { overflow: hidden; }
+    .roadmap ol { margin: 8px 0 0 18px; font-size: .85rem; color: #a8bccf; padding-bottom: 4px; }
+    .roadmap li {
+      margin-bottom: 10px; line-height: 1.5;
+      opacity: 0; transform: translateX(-10px);
+      transition: opacity .35s var(--ease-out), transform .35s var(--ease-out);
+    }
+    details.roadmap[open] .roadmap li {
+      opacity: 1; transform: none;
+    }
+    details.roadmap[open] .roadmap li:nth-child(1) { transition-delay: .08s; }
+    details.roadmap[open] .roadmap li:nth-child(2) { transition-delay: .14s; }
+    details.roadmap[open] .roadmap li:nth-child(3) { transition-delay: .20s; }
+    details.roadmap[open] .roadmap li:nth-child(4) { transition-delay: .26s; }
+    details.roadmap[open] .roadmap li:nth-child(5) { transition-delay: .32s; }
     .roadmap li strong { color: var(--text); }
 
     .toast {
@@ -488,12 +558,18 @@
     }
     .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-    #output .card { animation: fadeUp .5s var(--ease-out) both; }
-    #output .card:nth-child(1) { animation-delay: .04s; }
-    #output .card:nth-child(2) { animation-delay: .1s; }
-    #output .card:nth-child(3) { animation-delay: .16s; }
-    #output .card:nth-child(4) { animation-delay: .22s; }
-    #output .card:nth-child(5) { animation-delay: .28s; }
+    #output { overflow: hidden; }
+    #output.reveal .card { animation: revealCard .6s var(--ease-out) both; }
+    #output.reveal .card:nth-child(1) { animation-delay: .05s; }
+    #output.reveal .card:nth-child(2) { animation-delay: .12s; }
+    #output.reveal .card:nth-child(3) { animation-delay: .19s; }
+    #output.reveal .card:nth-child(4) { animation-delay: .26s; }
+    #output.reveal .card:nth-child(5) { animation-delay: .33s; }
+    #output .metric { animation: popIn .5s var(--ease-spring) both; }
+    #output.reveal .metric:nth-child(1) { animation-delay: .15s; }
+    #output.reveal .metric:nth-child(2) { animation-delay: .22s; }
+    #output.reveal .metric:nth-child(3) { animation-delay: .29s; }
+    #output.reveal .metric:nth-child(4) { animation-delay: .36s; }
 
     button:focus-visible, select:focus-visible, input:focus-visible, .coach:focus-visible,
     .custom-select-trigger:focus-visible {
@@ -543,6 +619,8 @@
         animation-duration: .01ms !important; animation-delay: 0ms !important;
         transition-duration: .01ms !important;
       }
+      details.roadmap .roadmap-body { transition: none; }
+      details.roadmap .roadmap li { opacity: 1; transform: none; transition: none; }
       html { scroll-behavior: auto; }
     }
   </style>
@@ -704,18 +782,22 @@
       </div>
     </div>
 
-    <details class="roadmap">
+    <details class="roadmap animate-in animate-in-d4">
       <summary data-i18n="roadmap_title">Integration roadmap (if shipped to production)</summary>
-      <ol>
-        <li><strong>Phase 1 — Stub (today):</strong> Cup Run → load rules → Portable Prompt. Zero backend.</li>
-        <li><strong>Phase 2 — Data:</strong> Garmin/Strava OAuth reads real CTL/ATL; replace projections with live metrics.</li>
-        <li><strong>Phase 3 — Sync:</strong> Tipmaster kickoff webhook triggers auto-reschedule in AiTrainingPlan dashboard.</li>
-        <li><strong>Phase 4 — Notify:</strong> Halftime push + "match ends in 30′ — wind-down protocol" on Apple Watch.</li>
-        <li><strong>Phase 5 — Cross-sell:</strong> Tipmaster "coach's bench" CTA → AiTrainingPlan WM-Fan-Modus for DACH users.</li>
-      </ol>
+      <div class="roadmap-body">
+        <div class="roadmap-inner">
+          <ol>
+            <li><strong>Phase 1 — Stub (today):</strong> Cup Run → load rules → Portable Prompt. Zero backend.</li>
+            <li><strong>Phase 2 — Data:</strong> Garmin/Strava OAuth reads real CTL/ATL; replace projections with live metrics.</li>
+            <li><strong>Phase 3 — Sync:</strong> Tipmaster kickoff webhook triggers auto-reschedule in AiTrainingPlan dashboard.</li>
+            <li><strong>Phase 4 — Notify:</strong> Halftime push + "match ends in 30′ — wind-down protocol" on Apple Watch.</li>
+            <li><strong>Phase 5 — Cross-sell:</strong> Tipmaster "coach's bench" CTA → AiTrainingPlan WM-Fan-Modus for DACH users.</li>
+          </ol>
+        </div>
+      </div>
     </details>
 
-    <footer>
+    <footer class="animate-in animate-in-d5">
       <a href="https://aitrainingplan.app" target="_blank" rel="noopener">aitrainingplan.app</a> assessment ·
       <a href="https://tipmaster.de/world-cup/" target="_blank" rel="noopener">tipmaster.de World Cup</a> ·
       <a href="https://github.com/lucasfrotam/wc-fan-mode-stub" target="_blank" rel="noopener">GitHub</a> ·
@@ -1274,6 +1356,13 @@ Refine this plan for my actual Garmin/Strava data. Ask me for this week's CTL, A
       });
     }
 
+    function triggerReveal() {
+      const output = document.getElementById('output');
+      output.classList.remove('reveal');
+      void output.offsetWidth;
+      output.classList.add('reveal');
+    }
+
     function runGenerate(scroll = true) {
       const btn = document.getElementById('generate');
       btn.classList.add('loading');
@@ -1321,10 +1410,16 @@ Refine this plan for my actual Garmin/Strava data. Ask me for this week's CTL, A
       renderConsensus(r, match, raceWeeks);
       lastState = { nation, match, r, plan, raceWeeks };
 
+      triggerReveal();
+
       const draw = () => { drawChart(r.curve, match); bindChartHover(); };
       requestAnimationFrame(() => { draw(); requestAnimationFrame(draw); });
 
-      setTimeout(() => btn.classList.remove('loading'), 400);
+      setTimeout(() => {
+        btn.classList.remove('loading');
+        btn.classList.add('done');
+        setTimeout(() => btn.classList.remove('done'), 500);
+      }, 400);
       if (scroll) document.getElementById('output').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
