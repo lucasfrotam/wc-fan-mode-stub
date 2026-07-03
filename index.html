@@ -143,22 +143,134 @@
 
     label {
       display: block; font-size: .82rem; color: var(--muted);
-      margin-bottom: 6px; margin-top: 12px;
+      margin-bottom: 8px; margin-top: 14px; font-weight: 500;
     }
     label:first-of-type { margin-top: 0; }
-    select, input[type=range], textarea {
-      width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border);
-      background: var(--card2); color: var(--text); font-size: 16px; font-family: inherit;
+
+    /* ── custom select ── */
+    .custom-select { position: relative; margin-bottom: 4px; }
+    .custom-select-trigger {
+      width: 100%; min-height: 48px; padding: 12px 44px 12px 14px;
+      border-radius: 12px; border: 1px solid var(--border);
+      background: var(--card2); color: var(--text);
+      font-size: .92rem; font-family: inherit; font-weight: 500;
+      text-align: left; cursor: pointer; display: flex; align-items: center;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+      flex: unset; min-width: unset;
+    }
+    .custom-select-trigger:hover { border-color: rgba(45,212,191,.35); background: #101820; }
+    .custom-select.open .custom-select-trigger {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(45,212,191,.12);
+      border-bottom-left-radius: 4px; border-bottom-right-radius: 4px;
+    }
+    .custom-select-value { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .custom-select-chevron {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      width: 18px; height: 18px; pointer-events: none; color: var(--muted);
+      transition: transform .25s var(--ease-out), color .2s;
+    }
+    .custom-select.open .custom-select-chevron { transform: translateY(-50%) rotate(180deg); color: var(--accent); }
+    .custom-select-menu {
+      position: absolute; top: calc(100% - 1px); left: 0; right: 0; z-index: 50;
+      background: #0e151d; border: 1px solid var(--accent);
+      border-top: 1px solid rgba(45,212,191,.25);
+      border-radius: 0 0 12px 12px;
+      box-shadow: 0 12px 36px rgba(0,0,0,.5);
+      max-height: 220px; overflow-y: auto;
+      list-style: none; padding: 6px;
+      opacity: 0; transform: translateY(-6px) scaleY(.96);
+      transform-origin: top; pointer-events: none;
+      transition: opacity .2s, transform .2s var(--ease-out);
+    }
+    .custom-select.open .custom-select-menu {
+      opacity: 1; transform: none; pointer-events: auto;
+    }
+    .custom-select-option {
+      padding: 11px 12px; border-radius: 8px; font-size: .9rem;
+      color: var(--text); cursor: pointer; transition: background .15s, color .15s;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .custom-select-option:hover { background: rgba(45,212,191,.08); color: #fff; }
+    .custom-select-option.selected {
+      background: rgba(45,212,191,.14); color: var(--accent); font-weight: 600;
+    }
+    .custom-select-option.selected::after {
+      content: "✓"; margin-left: auto; font-size: .75rem; color: var(--accent);
+    }
+    .custom-select-menu::-webkit-scrollbar { width: 5px; }
+    .custom-select-menu::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    select.native-select {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    /* ── custom range ── */
+    .range-wrap { position: relative; padding: 6px 0 2px; }
+    .range-track-bg {
+      position: absolute; top: 50%; left: 0; right: 0; height: 6px;
+      transform: translateY(-50%); background: var(--card2);
+      border-radius: 6px; border: 1px solid var(--border); pointer-events: none;
+    }
+    .range-track-fill {
+      position: absolute; top: 50%; left: 0; height: 6px;
+      transform: translateY(-50%); background: linear-gradient(90deg, var(--accent2), var(--accent));
+      border-radius: 6px; pointer-events: none; width: var(--pct, 35%);
+      transition: width .1s;
+    }
+    input[type=range] {
+      -webkit-appearance: none; appearance: none; width: 100%;
+      height: 44px; background: transparent; cursor: pointer; position: relative; z-index: 1;
+      margin: 0; padding: 0;
+    }
+    input[type=range]:focus { outline: none; }
+    input[type=range]:focus-visible + .range-track-bg,
+    .range-wrap:focus-within .range-track-bg {
+      box-shadow: 0 0 0 3px rgba(45,212,191,.12); border-color: var(--accent);
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%;
+      background: linear-gradient(135deg, #fff, #e0fdf8);
+      border: 2px solid var(--accent); box-shadow: 0 2px 10px rgba(45,212,191,.4);
+      cursor: grab; transition: transform .15s var(--ease-spring), box-shadow .15s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.12); box-shadow: 0 4px 16px rgba(45,212,191,.55);
+    }
+    input[type=range]::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.05); }
+    input[type=range]::-webkit-slider-runnable-track { height: 6px; background: transparent; }
+    input[type=range]::-moz-range-thumb {
+      width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--accent);
+      background: linear-gradient(135deg, #fff, #e0fdf8);
+      box-shadow: 0 2px 10px rgba(45,212,191,.4); cursor: grab;
+    }
+    input[type=range]::-moz-range-track { height: 6px; background: transparent; border: none; }
+    .range-ticks {
+      display: flex; justify-content: space-between; margin-top: 4px;
+      font-size: .65rem; color: #4a6278; padding: 0 2px;
+    }
+
+    /* ── textarea ── */
+    .textarea-field {
+      width: 100%; padding: 14px; border-radius: 12px;
+      border: 1px solid var(--border); background: var(--card2);
+      color: #94a8bc; font-size: .78rem; line-height: 1.55;
+      font-family: 'SF Mono', ui-monospace, Menlo, monospace;
+      resize: vertical; min-height: 140px;
       transition: border-color .2s, box-shadow .2s;
-      -webkit-appearance: none; appearance: none;
     }
-    select {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%237d92a8' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
+    .textarea-field:hover { border-color: rgba(45,212,191,.25); }
+    .textarea-field:focus {
+      border-color: var(--accent); outline: none;
+      box-shadow: 0 0 0 3px rgba(45,212,191,.1);
     }
-    select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(45,212,191,.15); outline: none; }
-    input[type=range] { padding: 0; accent-color: var(--accent); min-height: 44px; }
-    .range-val { font-size: .85rem; color: var(--accent); font-weight: 700; float: right; }
+    .textarea-field::-webkit-scrollbar { width: 6px; }
+    .textarea-field::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .range-val {
+      font-size: .82rem; color: var(--accent); font-weight: 700; float: right;
+      background: rgba(45,212,191,.1); padding: 2px 8px; border-radius: 6px;
+    }
 
     .btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
     button {
@@ -281,7 +393,7 @@
       margin-top: 10px; min-height: 130px; resize: vertical; font-size: .78rem;
       line-height: 1.5; color: #94a8bc;
     }
-    @media (max-width: 480px) { textarea { min-height: 110px; font-size: .75rem; } }
+    @media (max-width: 480px) { .textarea-field { min-height: 110px; font-size: .75rem; } }
 
     footer {
       margin-top: 28px; font-size: .76rem; color: var(--muted);
@@ -344,7 +456,8 @@
     #output .card:nth-child(4) { animation-delay: .22s; }
     #output .card:nth-child(5) { animation-delay: .28s; }
 
-    button:focus-visible, select:focus-visible, input:focus-visible, .coach:focus-visible {
+    button:focus-visible, select:focus-visible, input:focus-visible, .coach:focus-visible,
+    .custom-select-trigger:focus-visible {
       outline: 2px solid var(--accent); outline-offset: 3px;
     }
     .ver { font-size: .66rem; color: #4a5d70; margin-top: 8px; }
@@ -431,28 +544,47 @@
 
     <div class="card animate-in animate-in-d3">
       <h2 data-i18n="setup">Your setup</h2>
-      <label for="nation" data-i18n="lbl_nation">Nation you support</label>
-      <select id="nation">
-        <option value="germany">Germany 🇩🇪</option>
-        <option value="brazil">Brazil 🇧🇷</option>
-        <option value="usa">United States 🇺🇸</option>
-        <option value="mexico">Mexico 🇲🇽</option>
-        <option value="other">Other (CET schedule)</option>
-      </select>
+      <label data-i18n="lbl_nation">Nation you support</label>
+      <div class="custom-select" id="nationSelect">
+        <button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="lbl_nation">
+          <span class="custom-select-value">Germany 🇩🇪</span>
+          <svg class="custom-select-chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7.5l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <ul class="custom-select-menu" role="listbox"></ul>
+        <select id="nation" class="native-select" tabindex="-1" aria-hidden="true">
+          <option value="germany">Germany 🇩🇪</option>
+          <option value="brazil">Brazil 🇧🇷</option>
+          <option value="usa">United States 🇺🇸</option>
+          <option value="mexico">Mexico 🇲🇽</option>
+          <option value="other">Other (CET schedule)</option>
+        </select>
+      </div>
 
-      <label for="cupRun" data-i18n="lbl_cuprun">Tipmaster Cup Run (real WC 2026 schedule)</label>
-      <select id="cupRun">
-        <option value="weekday_early">Cup Run 1 · 11–14 Jun · early CET kickoffs</option>
-        <option value="weekday_late">Cup Run 3 · 18–21 Jun · late 22:00 CET games</option>
-        <option value="weekend">Cup Run 5 · 25–28 Jun · weekend block</option>
-        <option value="knockout">Cup Run 12 · 17–19 Jul · final week, 02:00 risk</option>
-      </select>
+      <label data-i18n="lbl_cuprun">Tipmaster Cup Run (real WC 2026 schedule)</label>
+      <div class="custom-select" id="cupRunSelect">
+        <button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false">
+          <span class="custom-select-value">Cup Run 1 · 11–14 Jun · early CET kickoffs</span>
+          <svg class="custom-select-chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7.5l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <ul class="custom-select-menu" role="listbox"></ul>
+        <select id="cupRun" class="native-select" tabindex="-1" aria-hidden="true">
+          <option value="weekday_early">Cup Run 1 · 11–14 Jun · early CET kickoffs</option>
+          <option value="weekday_late">Cup Run 3 · 18–21 Jun · late 22:00 CET games</option>
+          <option value="weekend">Cup Run 5 · 25–28 Jun · weekend block</option>
+          <option value="knockout">Cup Run 12 · 17–19 Jul · final week, 02:00 risk</option>
+        </select>
+      </div>
 
       <label for="raceWeeks">
         <span data-i18n="lbl_race">Weeks until A-race</span>
         <span class="range-val" id="raceWeeksVal">8 wk</span>
       </label>
-      <input type="range" id="raceWeeks" min="2" max="20" value="8">
+      <div class="range-wrap" id="rangeWrap">
+        <div class="range-track-bg"></div>
+        <div class="range-track-fill" id="rangeFill"></div>
+        <input type="range" id="raceWeeks" min="2" max="20" value="8" aria-valuemin="2" aria-valuemax="20" aria-valuenow="8">
+      </div>
+      <div class="range-ticks"><span>2</span><span>8</span><span>14</span><span>20</span></div>
 
       <div class="btn-row">
         <button type="button" class="btn-primary" id="generate" data-i18n="btn_gen">Generate adjusted week</button>
@@ -516,7 +648,7 @@
       <div class="card">
         <h2 data-i18n="prompt_title">Portable AI Coach Prompt</h2>
         <p style="font-size:.84rem;color:var(--muted);margin-bottom:4px" data-i18n="prompt_desc">Mirrors AiTrainingPlan's portable-prompt workflow — paste into ChatGPT, Claude, or Gemini.</p>
-        <textarea id="aiPrompt" readonly></textarea>
+        <textarea id="aiPrompt" class="textarea-field" readonly></textarea>
         <div class="btn-row">
           <button type="button" class="btn-secondary" id="copyPrompt" data-i18n="btn_copy">Copy prompt</button>
           <button type="button" class="btn-secondary" id="copyPlan" data-i18n="btn_copy_plan">Copy plan as markdown</button>
@@ -540,7 +672,7 @@
       <a href="https://tipmaster.de/world-cup/" target="_blank" rel="noopener">tipmaster.de World Cup</a> ·
       <a href="https://github.com/lucasfrotam/wc-fan-mode-stub" target="_blank" rel="noopener">GitHub</a> ·
       <a href="https://github.com/lucasfrotam/wc-fan-mode-stub#readme" target="_blank" rel="noopener">README</a>
-      <div class="ver">v1.5 · mobile-first UI · Lucas Marinho · WTF Assessment 2026</div>
+      <div class="ver">v1.6 · custom UI system · Lucas Marinho · WTF Assessment 2026</div>
     </footer>
   </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -677,11 +809,12 @@
 
     function applyState(s) {
       if (!s) return;
-      if (s.nation) document.getElementById('nation').value = s.nation;
-      if (s.cupRun) document.getElementById('cupRun').value = s.cupRun;
+      if (s.nation) { document.getElementById('nation').value = s.nation; syncCustomSelect('nation'); }
+      if (s.cupRun) { document.getElementById('cupRun').value = s.cupRun; syncCustomSelect('cupRun'); }
       if (s.raceWeeks) {
         document.getElementById('raceWeeks').value = s.raceWeeks;
         document.getElementById('raceWeeksVal').textContent = s.raceWeeks + (lang === 'de' ? ' Wo' : ' wk');
+        updateRangeFill();
       }
     }
 
@@ -710,6 +843,80 @@
 
     document.getElementById('raceWeeks').addEventListener('input', e => {
       document.getElementById('raceWeeksVal').textContent = e.target.value + (lang === 'de' ? ' Wo' : ' wk');
+      updateRangeFill();
+    });
+
+    function initCustomSelect(wrapperId) {
+      const wrapper = document.getElementById(wrapperId);
+      const select = wrapper.querySelector('select');
+      const trigger = wrapper.querySelector('.custom-select-trigger');
+      const valueEl = wrapper.querySelector('.custom-select-value');
+      const menu = wrapper.querySelector('.custom-select-menu');
+
+      function close() {
+        wrapper.classList.remove('open');
+        trigger.setAttribute('aria-expanded', 'false');
+      }
+
+      function selectOption(value) {
+        select.value = value;
+        valueEl.textContent = select.selectedOptions[0].textContent;
+        menu.querySelectorAll('.custom-select-option').forEach(li =>
+          li.classList.toggle('selected', li.dataset.value === value));
+        close();
+      }
+
+      [...select.options].forEach(opt => {
+        const li = document.createElement('li');
+        li.className = 'custom-select-option' + (opt.selected ? ' selected' : '');
+        li.setAttribute('role', 'option');
+        li.dataset.value = opt.value;
+        li.textContent = opt.textContent;
+        li.addEventListener('click', e => { e.stopPropagation(); selectOption(opt.value); });
+        menu.appendChild(li);
+      });
+
+      trigger.addEventListener('click', e => {
+        e.stopPropagation();
+        const isOpen = wrapper.classList.toggle('open');
+        trigger.setAttribute('aria-expanded', isOpen);
+        if (isOpen) {
+          document.querySelectorAll('.custom-select.open').forEach(el => {
+            if (el !== wrapper) {
+              el.classList.remove('open');
+              el.querySelector('.custom-select-trigger').setAttribute('aria-expanded', 'false');
+            }
+          });
+        }
+      });
+
+      trigger.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); trigger.click(); }
+        if (e.key === 'Escape') close();
+      });
+    }
+
+    function syncCustomSelect(selectId) {
+      const select = document.getElementById(selectId);
+      const wrapper = select.closest('.custom-select');
+      wrapper.querySelector('.custom-select-value').textContent = select.selectedOptions[0].textContent;
+      wrapper.querySelectorAll('.custom-select-option').forEach(li =>
+        li.classList.toggle('selected', li.dataset.value === select.value));
+    }
+
+    function updateRangeFill() {
+      const input = document.getElementById('raceWeeks');
+      const min = +input.min, max = +input.max, val = +input.value;
+      const pct = ((val - min) / (max - min)) * 100;
+      document.getElementById('rangeFill').style.width = pct + '%';
+      input.setAttribute('aria-valuenow', val);
+    }
+
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.custom-select.open').forEach(el => {
+        el.classList.remove('open');
+        el.querySelector('.custom-select-trigger').setAttribute('aria-expanded', 'false');
+      });
     });
 
     function setMetric(el, val, cls, animate = false) {
@@ -1091,6 +1298,10 @@ Refine this plan for my actual Garmin/Strava data. Ask me for this week's CTL, A
     });
 
     (function init() {
+      initCustomSelect('nationSelect');
+      initCustomSelect('cupRunSelect');
+      updateRangeFill();
+
       const params = Object.fromEntries(new URLSearchParams(location.search));
       const isShareLink = params.cupRun && params.nation;
 
@@ -1113,8 +1324,11 @@ Refine this plan for my actual Garmin/Strava data. Ask me for this week's CTL, A
       } else {
         document.getElementById('nation').value = 'germany';
         document.getElementById('cupRun').value = 'weekday_early';
+        syncCustomSelect('nation');
+        syncCustomSelect('cupRun');
         document.getElementById('raceWeeks').value = 8;
         document.getElementById('raceWeeksVal').textContent = '8 wk';
+        updateRangeFill();
         if (location.search) history.replaceState(null, '', location.pathname);
       }
     })();
