@@ -823,8 +823,6 @@ Refine this plan for my actual Garmin/Strava data. Ask me for this week's CTL, A
       document.getElementById('output').classList.remove('hidden');
       lastState = { nation, match, r, plan, raceWeeks };
 
-      try { localStorage.setItem('wcFanMode', JSON.stringify(getState())); } catch (_) {}
-
       const draw = () => { drawChart(r.curve, match); bindChartHover(); };
       requestAnimationFrame(() => { draw(); requestAnimationFrame(draw); });
 
@@ -835,7 +833,6 @@ Refine this plan for my actual Garmin/Strava data. Ask me for this week's CTL, A
 
     document.getElementById('shareLink').addEventListener('click', async () => {
       const url = buildShareUrl();
-      history.replaceState(null, '', url);
       await navigator.clipboard.writeText(url);
       toast(I18N[lang].toast_share);
     });
