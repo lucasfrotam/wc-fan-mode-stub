@@ -4,262 +4,454 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>World Cup Fan Mode — AiTrainingPlan Feature Stub</title>
-  <meta name="description" content="Feature stub: adaptive training load around World Cup 2026 match nights for endurance athletes.">
+  <meta name="description" content="Adaptive training load around World Cup 2026 match nights. Feature stub for aitrainingplan.app.">
   <style>
     :root {
-      --bg: #0b0f14;
-      --card: #141b24;
-      --border: #243040;
-      --text: #e8eef5;
-      --muted: #8fa3b8;
+      --bg: #080c10;
+      --card: #111820;
+      --card2: #0d1218;
+      --border: #1e2d3d;
+      --text: #edf2f7;
+      --muted: #7d92a8;
       --accent: #2dd4bf;
+      --accent2: #14b8a6;
       --warn: #f59e0b;
-      --danger: #ef4444;
-      --ok: #22c55e;
-      --font: system-ui, -apple-system, sans-serif;
+      --danger: #f87171;
+      --ok: #4ade80;
+      --font: "SF Pro Text", system-ui, -apple-system, sans-serif;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
-      min-height: 100vh;
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.55; min-height: 100vh; }
+    body::before {
+      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(45,212,191,.12), transparent);
     }
-    .wrap { max-width: 720px; margin: 0 auto; padding: 24px 16px 48px; }
-    header { margin-bottom: 28px; }
+    .wrap { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 20px 16px 56px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
     .badge {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      color: var(--accent);
-      border: 1px solid var(--accent);
-      border-radius: 4px;
-      padding: 3px 8px;
-      margin-bottom: 12px;
+      font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      color: var(--accent); border: 1px solid rgba(45,212,191,.4); border-radius: 6px; padding: 4px 10px;
+      background: rgba(45,212,191,.06);
     }
-    h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; }
-    .sub { color: var(--muted); font-size: .95rem; }
+    .lang-toggle { display: flex; gap: 4px; }
+    .lang-toggle button {
+      width: auto; margin: 0; padding: 5px 10px; font-size: .75rem; background: var(--card);
+      border: 1px solid var(--border); color: var(--muted); border-radius: 6px; cursor: pointer;
+    }
+    .lang-toggle button.active { color: var(--accent); border-color: var(--accent); background: rgba(45,212,191,.08); }
+    h1 { font-size: clamp(1.4rem, 4vw, 1.85rem); font-weight: 800; letter-spacing: -.02em; margin-bottom: 8px; }
+    .sub { color: var(--muted); font-size: .93rem; max-width: 620px; }
+    .why {
+      margin: 20px 0; padding: 14px 16px; border-radius: 10px;
+      background: linear-gradient(135deg, rgba(45,212,191,.07), rgba(20,184,166,.03));
+      border: 1px solid rgba(45,212,191,.2); font-size: .88rem; color: #b8c9d9;
+    }
+    .why strong { color: var(--accent); }
     .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 16px;
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 20px; margin-bottom: 14px;
     }
-    .card h2 { font-size: .85rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 14px; }
-    label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: 6px; }
-    select, button {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--text);
-      font-size: 1rem;
-      font-family: inherit;
+    .card h2 {
+      font-size: .78rem; text-transform: uppercase; letter-spacing: .07em;
+      color: var(--muted); margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
     }
+    .card h2::before { content: ""; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+    label { display: block; font-size: .82rem; color: var(--muted); margin-bottom: 6px; margin-top: 10px; }
+    label:first-of-type { margin-top: 0; }
+    select, input[type=range], textarea {
+      width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--card2); color: var(--text); font-size: .95rem; font-family: inherit;
+    }
+    input[type=range] { padding: 0; accent-color: var(--accent); }
+    .range-val { font-size: .85rem; color: var(--accent); font-weight: 600; float: right; }
+    .btn-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
     button {
-      background: var(--accent);
-      color: #042f2e;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      margin-top: 12px;
+      flex: 1; min-width: 140px; padding: 11px 14px; border-radius: 9px; border: none;
+      font-size: .92rem; font-weight: 600; font-family: inherit; cursor: pointer;
     }
-    button:hover { filter: brightness(1.08); }
-    .metrics {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-top: 16px;
-    }
-    .metric {
-      background: var(--bg);
-      border-radius: 8px;
-      padding: 12px;
-      text-align: center;
-    }
-    .metric .val { font-size: 1.4rem; font-weight: 700; }
-    .metric .lbl { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #042f2e; }
+    .btn-secondary { background: var(--card2); color: var(--text); border: 1px solid var(--border); flex: 0 1 auto; }
+    button:hover { filter: brightness(1.06); }
+    .btn-secondary.copied { border-color: var(--ok); color: var(--ok); }
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 4px; }
+    @media (max-width: 520px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
+    .metric { background: var(--card2); border-radius: 10px; padding: 12px 8px; text-align: center; border: 1px solid var(--border); }
+    .metric .val { font-size: 1.35rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .metric .lbl { font-size: .65rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-top: 2px; }
     .metric.warn .val { color: var(--warn); }
     .metric.danger .val { color: var(--danger); }
     .metric.ok .val { color: var(--ok); }
-    .plan-item {
-      display: flex;
-      gap: 12px;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .plan-item:last-child { border-bottom: none; }
-    .plan-time { font-weight: 600; min-width: 52px; color: var(--accent); font-size: .9rem; }
-    .plan-body h3 { font-size: .95rem; margin-bottom: 2px; }
-    .plan-body p { font-size: .85rem; color: var(--muted); }
-    .tag {
-      display: inline-block;
-      font-size: .7rem;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: #1e293b;
-      color: var(--muted);
-      margin-top: 4px;
-    }
+    .acwr-bar { margin: 14px 0 6px; }
+    .acwr-track { height: 8px; background: var(--card2); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+    .acwr-fill { height: 100%; border-radius: 4px; transition: width .4s ease, background .4s; }
+    .acwr-label { display: flex; justify-content: space-between; font-size: .75rem; color: var(--muted); margin-top: 4px; }
+    .chart-wrap { margin-top: 12px; background: var(--card2); border-radius: 10px; padding: 12px; border: 1px solid var(--border); }
+    canvas { width: 100%; height: 120px; display: block; }
+    .chart-legend { display: flex; gap: 14px; margin-top: 8px; font-size: .72rem; color: var(--muted); flex-wrap: wrap; }
+    .chart-legend span::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+    .leg-tsb::before { background: var(--accent); }
+    .leg-atl::before { background: var(--warn); }
     .insight {
-      font-size: .9rem;
-      color: var(--muted);
-      border-left: 3px solid var(--accent);
-      padding-left: 12px;
-      margin-top: 12px;
+      font-size: .88rem; color: #a8bccf; border-left: 3px solid var(--accent);
+      padding: 10px 0 10px 14px; margin-top: 14px; line-height: 1.5;
     }
-    footer {
-      margin-top: 32px;
-      font-size: .8rem;
-      color: var(--muted);
-      text-align: center;
+    .plan-item { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+    .plan-item:last-child { border-bottom: none; }
+    .plan-day {
+      font-weight: 700; min-width: 44px; font-size: .82rem; color: var(--accent);
+      background: rgba(45,212,191,.08); border-radius: 6px; padding: 4px 6px; text-align: center;
     }
-    footer a { color: var(--accent); }
+    .plan-body h3 { font-size: .93rem; margin-bottom: 2px; }
+    .plan-body p { font-size: .82rem; color: var(--muted); }
+    .tag {
+      display: inline-block; font-size: .68rem; font-weight: 600; padding: 2px 7px; border-radius: 4px;
+      margin-top: 5px; letter-spacing: .03em;
+    }
+    .tag-key { background: rgba(45,212,191,.15); color: var(--accent); }
+    .tag-rest { background: rgba(125,146,168,.15); color: var(--muted); }
+    .tag-warn { background: rgba(245,158,11,.15); color: var(--warn); }
+    .cup-run {
+      font-size: .82rem; color: var(--muted); padding: 10px 12px; background: var(--card2);
+      border-radius: 8px; border: 1px dashed var(--border); margin-top: 10px;
+    }
+    .cup-run em { color: var(--accent); font-style: normal; font-weight: 600; }
+    textarea {
+      margin-top: 10px; min-height: 140px; resize: vertical; font-size: .78rem;
+      line-height: 1.45; color: #94a8bc;
+    }
+    footer { margin-top: 28px; font-size: .78rem; color: var(--muted); text-align: center; line-height: 1.8; }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
     .hidden { display: none; }
   </style>
 </head>
 <body>
   <div class="wrap">
+    <div class="topbar">
+      <div class="badge">AiTrainingPlan · Feature Stub v2</div>
+      <div class="lang-toggle">
+        <button type="button" class="active" data-lang="en">EN</button>
+        <button type="button" data-lang="de">DE</button>
+      </div>
+    </div>
+
     <header>
-      <div class="badge">AiTrainingPlan · Feature Stub</div>
-      <h1>World Cup Fan Mode</h1>
-      <p class="sub">Endurance athletes watching WC 2026 lose sleep and skip sessions. This stub auto-adjusts your week around match nights — same adaptive logic as CTL/ATL/TSB, applied to tournament life.</p>
+      <h1 data-i18n="title">World Cup Fan Mode</h1>
+      <p class="sub" data-i18n="subtitle">DACH-market insight: Tipmaster fans tip 8 matches per Cup Run. Endurance athletes lose sleep on 22:00 CET kickoffs. This stub reshuffles your week and exports a Portable AI Coach prompt — same pattern as AiTrainingPlan's core workflow.</p>
     </header>
 
+    <div class="why">
+      <strong data-i18n="why_label">Product judgement:</strong>
+      <span data-i18n="why_text"> Tipmaster owns predictions; AiTrainingPlan owns the body. Overlap audience = German football fans who also run marathons. Neither product addresses tournament-month training disruption — this feature stub fills that gap without copying either UI.</span>
+    </div>
+
     <div class="card">
-      <h2>Your setup</h2>
-      <label for="nation">Nation you support</label>
+      <h2 data-i18n="setup">Your setup</h2>
+      <label for="nation" data-i18n="lbl_nation">Nation you support</label>
       <select id="nation">
-        <option value="germany">Germany</option>
-        <option value="brazil">Brazil</option>
-        <option value="usa">United States</option>
-        <option value="mexico">Mexico</option>
-        <option value="other">Other (generic CET schedule)</option>
+        <option value="germany">Germany 🇩🇪</option>
+        <option value="brazil">Brazil 🇧🇷</option>
+        <option value="usa">United States 🇺🇸</option>
+        <option value="mexico">Mexico 🇲🇽</option>
+        <option value="other">Other (CET schedule)</option>
       </select>
-      <label for="nextMatch" style="margin-top:12px">Next match night</label>
-      <select id="nextMatch">
-        <option value="weekday_early">Weekday · 19:00 CET kickoff</option>
-        <option value="weekday_late">Weekday · 22:00 CET kickoff</option>
-        <option value="weekend">Weekend · afternoon kickoff</option>
-        <option value="knockout">Knockout · 02:00 CET (extra time risk)</option>
+
+      <label for="cupRun" data-i18n="lbl_cuprun">Tipmaster Cup Run (real WC 2026 schedule)</label>
+      <select id="cupRun">
+        <option value="weekday_early">Cup Run 1 · 11–14 Jun · early CET kickoffs</option>
+        <option value="weekday_late">Cup Run 3 · 18–21 Jun · late 22:00 CET games</option>
+        <option value="weekend">Cup Run 5 · 25–28 Jun · weekend block</option>
+        <option value="knockout">Cup Run 12 · 17–19 Jul · final week, 02:00 risk</option>
       </select>
-      <button type="button" id="generate">Generate adjusted week</button>
+
+      <label for="raceWeeks">
+        <span data-i18n="lbl_race">Weeks until A-race</span>
+        <span class="range-val" id="raceWeeksVal">8 wk</span>
+      </label>
+      <input type="range" id="raceWeeks" min="2" max="20" value="8">
+
+      <div class="btn-row">
+        <button type="button" class="btn-primary" id="generate" data-i18n="btn_gen">Generate adjusted week</button>
+      </div>
     </div>
 
     <div id="output" class="hidden">
       <div class="card">
-        <h2>Projected load impact</h2>
+        <h2 data-i18n="load_title">Projected load impact</h2>
         <div class="metrics">
           <div class="metric" id="mCtl"><div class="val">—</div><div class="lbl">CTL Δ</div></div>
           <div class="metric" id="mAtl"><div class="val">—</div><div class="lbl">ATL Δ</div></div>
           <div class="metric" id="mTsb"><div class="val">—</div><div class="lbl">TSB</div></div>
+          <div class="metric" id="mInj"><div class="val">—</div><div class="lbl" data-i18n="injury">Injury</div></div>
+        </div>
+        <div class="acwr-bar">
+          <div class="acwr-track"><div class="acwr-fill" id="acwrFill" style="width:0%"></div></div>
+          <div class="acwr-label"><span>ACWR 0.8</span><span id="acwrVal">—</span><span>ACWR 1.5</span></div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="chart" width="680" height="120"></canvas>
+          <div class="chart-legend">
+            <span class="leg-tsb">7-day TSB projection</span>
+            <span class="leg-atl">ATL spike on match night</span>
+          </div>
         </div>
         <p class="insight" id="insight"></p>
+        <div class="cup-run" id="cupRunNote"></div>
       </div>
 
       <div class="card">
-        <h2>Adjusted 7-day plan</h2>
+        <h2 data-i18n="plan_title">Adjusted 7-day plan</h2>
         <div id="plan"></div>
       </div>
 
       <div class="card">
-        <h2>Halftime protocol (12 min)</h2>
+        <h2 data-i18n="halftime_title">Halftime protocol (12 min)</h2>
         <div class="plan-item">
-          <span class="plan-time">0–4′</span>
-          <div class="plan-body"><h3>Hip flexor + ankle mobility</h3><p>Standing couch stretch, calf pumps — counter 90′ seated posture.</p></div>
+          <span class="plan-day">0–4′</span>
+          <div class="plan-body"><h3 data-i18n="ht1t">Hip flexor + ankle mobility</h3><p data-i18n="ht1d">Standing couch stretch, calf pumps — counter 90′ seated posture.</p><span class="tag tag-rest">Mobility</span></div>
         </div>
         <div class="plan-item">
-          <span class="plan-time">4–8′</span>
-          <div class="plan-body"><h3>Glute activation</h3><p>Clamshells + band walks. Keeps posterior chain awake if you run next morning.</p></div>
+          <span class="plan-day">4–8′</span>
+          <div class="plan-body"><h3 data-i18n="ht2t">Glute activation</h3><p data-i18n="ht2d">Clamshells + band walks. Keeps posterior chain awake for next-morning runs.</p><span class="tag tag-rest">Activation</span></div>
         </div>
         <div class="plan-item">
-          <span class="plan-time">8–12′</span>
-          <div class="plan-body"><h3>Breathing reset</h3><p>4-7-8 pattern × 6 rounds. Lowers cortisol spike from high-stakes match stress.</p></div>
+          <span class="plan-day">8–12′</span>
+          <div class="plan-body"><h3 data-i18n="ht3t">Breathing reset</h3><p data-i18n="ht3d">4-7-8 × 6 rounds. Dampens cortisol from high-stakes match stress.</p><span class="tag tag-rest">Recovery</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="prompt_title">Portable AI Coach Prompt</h2>
+        <p style="font-size:.84rem;color:var(--muted);margin-bottom:4px" data-i18n="prompt_desc">Mirrors AiTrainingPlan's portable-prompt workflow — paste into ChatGPT, Claude, or Gemini.</p>
+        <textarea id="aiPrompt" readonly></textarea>
+        <div class="btn-row">
+          <button type="button" class="btn-secondary" id="copyPrompt" data-i18n="btn_copy">Copy prompt</button>
         </div>
       </div>
     </div>
 
     <footer>
-      Built for <a href="https://aitrainingplan.app" target="_blank" rel="noopener">aitrainingplan.app</a> assessment ·
-      Inspired by <a href="https://tipmaster.de/world-cup/" target="_blank" rel="noopener">tipmaster.de World Cup</a> fan schedule overlap
+      <a href="https://aitrainingplan.app" target="_blank" rel="noopener">aitrainingplan.app</a> assessment ·
+      <a href="https://tipmaster.de/world-cup/" target="_blank" rel="noopener">tipmaster.de World Cup</a> ·
+      <a href="https://github.com/lucasfrotam/wc-fan-mode-stub" target="_blank" rel="noopener">source on GitHub</a>
     </footer>
   </div>
 
   <script>
+    const I18N = {
+      en: {
+        title: 'World Cup Fan Mode',
+        subtitle: 'DACH-market insight: Tipmaster fans tip 8 matches per Cup Run. Endurance athletes lose sleep on 22:00 CET kickoffs. This stub reshuffles your week and exports a Portable AI Coach prompt — same pattern as AiTrainingPlan\'s core workflow.',
+        why_label: 'Product judgement:',
+        why_text: ' Tipmaster owns predictions; AiTrainingPlan owns the body. Overlap audience = German football fans who also run marathons. Neither product addresses tournament-month training disruption — this feature stub fills that gap without copying either UI.',
+        setup: 'Your setup', lbl_nation: 'Nation you support', lbl_cuprun: 'Tipmaster Cup Run (real WC 2026 schedule)',
+        lbl_race: 'Weeks until A-race', btn_gen: 'Generate adjusted week', load_title: 'Projected load impact',
+        injury: 'Injury', plan_title: 'Adjusted 7-day plan', halftime_title: 'Halftime protocol (12 min)',
+        ht1t: 'Hip flexor + ankle mobility', ht1d: 'Standing couch stretch, calf pumps — counter 90′ seated posture.',
+        ht2t: 'Glute activation', ht2d: 'Clamshells + band walks. Keeps posterior chain awake for next-morning runs.',
+        ht3t: 'Breathing reset', ht3d: '4-7-8 × 6 rounds. Dampens cortisol from high-stakes match stress.',
+        prompt_title: 'Portable AI Coach Prompt',
+        prompt_desc: 'Mirrors AiTrainingPlan\'s portable-prompt workflow — paste into ChatGPT, Claude, or Gemini.',
+        btn_copy: 'Copy prompt', copied: 'Copied ✓'
+      },
+      de: {
+        title: 'WM-Fan-Modus',
+        subtitle: 'DACH-Insight: Tipmaster-Tipper tippen 8 Spiele pro Cup Run. Ausdauersportler verlieren bei 22:00 CET-Anstoß Schlaf. Dieser Stub plant die Woche um und exportiert einen Portable-AI-Coach-Prompt — wie im AiTrainingPlan-Workflow.',
+        why_label: 'Produkturteil:',
+        why_text: ' Tipmaster = Tipps, AiTrainingPlan = Körper. Überschneidung: deutsche Fußballfans, die auch Marathon laufen. Kein Produkt löst Trainingschaos während des Turniers — dieser Stub füllt die Lücke.',
+        setup: 'Dein Setup', lbl_nation: 'Deine Nation', lbl_cuprun: 'Tipmaster Cup Run (echter WM 2026-Plan)',
+        lbl_race: 'Wochen bis zum A-Rennen', btn_gen: 'Angepasste Woche erstellen', load_title: 'Prognostizierte Belastung',
+        injury: 'Verletzung', plan_title: 'Angepasster 7-Tage-Plan', halftime_title: 'Halbzeit-Protokoll (12 Min)',
+        ht1t: 'Hüftbeuger + Sprunggelenk', ht1d: 'Couch-Stretch, Wadenpumpen — gegen 90′ Sitzen.',
+        ht2t: 'Gesäßaktivierung', ht2d: 'Clamshells + Band Walks. Hinterkette aktiv für Morgenläufe.',
+        ht3t: 'Atem-Reset', ht3d: '4-7-8 × 6 Runden. Senkt Cortisol nach Spielstress.',
+        prompt_title: 'Portable AI Coach Prompt',
+        prompt_desc: 'Wie AiTrainingPlan — in ChatGPT, Claude oder Gemini einfügen.',
+        btn_copy: 'Prompt kopieren', copied: 'Kopiert ✓'
+      }
+    };
+
     const RULES = {
-      weekday_early:  { ctl: -2, atl: +8,  tsb: -10, insight: 'Moderate fatigue spike. Move Tuesday intervals to Wednesday AM; keep Thursday easy.' },
-      weekday_late:   { ctl: -3, atl: +14, tsb: -17, insight: 'Late kickoff + adrenaline = poor sleep. Swap hard run for Z2 spin; push long run to Sunday.' },
-      weekend:        { ctl:  0, atl: +4,  tsb:  -4, insight: 'Minimal disruption. Treat match as social recovery — hydrate, skip alcohol if racing in 4 weeks.' },
-      knockout:       { ctl: -5, atl: +22, tsb: -27, insight: 'High ACWR risk. Auto-deload: one key session only, 48h before next match. Protect TSB.' },
+      weekday_early:  { ctl: -2, atl: 8,  tsb: -10, acwr: 1.12, injury: 'Low',
+        insight: 'Moderate fatigue spike. Move Tuesday intervals to Wednesday AM; keep Thursday easy.',
+        cup: 'Cup Run 1 (11–14 Jun): Germany vs Curaçao final on Sun 17:00 CET — plan hard sessions Mon–Wed only.',
+        curve: [-8,-9,-10,-9,-8,-7,-6] },
+      weekday_late:   { ctl: -3, atl: 14, tsb: -17, acwr: 1.28, injury: 'Moderate',
+        insight: 'Late kickoff + adrenaline = poor sleep. Swap hard run for Z2 spin; push long run to Sunday.',
+        cup: 'Cup Run 3: three 22:00 CET games — ATL peaks Thu/Fri. Auto-deload if A-race < 6 weeks out.',
+        curve: [-12,-14,-17,-15,-12,-9,-7] },
+      weekend:        { ctl: 0,  atl: 4,  tsb: -4,  acwr: 0.98, injury: 'Low',
+        insight: 'Minimal disruption. Match = social recovery — hydrate, skip alcohol if A-race < 4 weeks.',
+        cup: 'Cup Run 5 weekend block: train AM, watch PM. Long run stays Sunday.',
+        curve: [-2,-3,-4,-3,-2,-1,0] },
+      knockout:       { ctl: -5, atl: 22, tsb: -27, acwr: 1.42, injury: 'High',
+        insight: 'ACWR > 1.3 — auto-deload triggered. One key session max, 48h before next match. Protect TSB.',
+        cup: 'Cup Run 12 (Final week): 02:00 CET knockout risk. No intervals until HRV normalizes.',
+        curve: [-18,-22,-27,-24,-20,-15,-10] },
     };
 
     const PLANS = {
       weekday_early: [
-        { day: 'Mon', title: 'Easy 45′ run', note: 'Z2 only — bank sleep before match', tag: 'Z2' },
-        { day: 'Tue', title: 'Rest / mobility', note: 'Intervals moved — match night', tag: 'Rest' },
-        { day: 'Wed', title: 'VO2 intervals AM', note: '6×3′ @ 5k pace, 48h before next stress', tag: 'Key' },
-        { day: 'Thu', title: 'Easy spin 30′', note: 'Flush ATL from late bedtime', tag: 'Z1' },
-        { day: 'Fri', title: 'Strength 25′', note: 'Upper + core, no heavy legs', tag: 'Gym' },
-        { day: 'Sat', title: 'Long run −20%', note: 'Cut volume, not intensity cap', tag: 'Long' },
-        { day: 'Sun', title: 'Full rest', note: 'TSB recovery window', tag: 'Rest' },
+        { day: 'Mon', title: 'Easy 45′ run', note: 'Z2 only — bank sleep before match', tag: 'key', cls: 'tag-rest' },
+        { day: 'Tue', title: 'Rest / mobility', note: 'Intervals moved — match night', tag: 'Rest', cls: 'tag-rest' },
+        { day: 'Wed', title: 'VO2 intervals AM', note: '6×3′ @ 5k pace, 48h before stress', tag: 'Key', cls: 'tag-key' },
+        { day: 'Thu', title: 'Easy spin 30′', note: 'Flush ATL from late bedtime', tag: 'Z1', cls: 'tag-rest' },
+        { day: 'Fri', title: 'Strength 25′', note: 'Upper + core, no heavy legs', tag: 'Gym', cls: 'tag-rest' },
+        { day: 'Sat', title: 'Long run −20%', note: 'Cut volume, not intensity cap', tag: 'Long', cls: 'tag-warn' },
+        { day: 'Sun', title: 'Full rest', note: 'TSB recovery window', tag: 'Rest', cls: 'tag-rest' },
       ],
       weekday_late: [
-        { day: 'Mon', title: 'Easy 40′ run', note: 'Cap HR at aerobic ceiling', tag: 'Z2' },
-        { day: 'Tue', title: 'Tempo → postponed', note: 'Match 22:00 — no hard PM session', tag: 'Skip' },
-        { day: 'Wed', title: 'Easy 35′ + strides', note: '4×20″ strides only', tag: 'Z2' },
-        { day: 'Thu', title: 'Indoor bike 45′', note: 'Low impact while ATL elevated', tag: 'Z2' },
-        { day: 'Fri', title: 'Rest', note: 'Sleep debt payback', tag: 'Rest' },
-        { day: 'Sat', title: 'Parkrun pace 5k', note: 'Short sharp if feeling fresh', tag: 'Quality' },
-        { day: 'Sun', title: 'Long run', note: 'Moved from Saturday — full fuel', tag: 'Long' },
+        { day: 'Mon', title: 'Easy 40′ run', note: 'Cap HR at aerobic ceiling', tag: 'Z2', cls: 'tag-rest' },
+        { day: 'Tue', title: 'Tempo → postponed', note: 'Match 22:00 — no hard PM session', tag: 'Skip', cls: 'tag-warn' },
+        { day: 'Wed', title: 'Easy 35′ + strides', note: '4×20″ strides only', tag: 'Z2', cls: 'tag-rest' },
+        { day: 'Thu', title: 'Indoor bike 45′', note: 'Low impact while ATL elevated', tag: 'Z2', cls: 'tag-rest' },
+        { day: 'Fri', title: 'Rest', note: 'Sleep debt payback', tag: 'Rest', cls: 'tag-rest' },
+        { day: 'Sat', title: 'Parkrun-pace 5k', note: 'Short sharp if feeling fresh', tag: 'Quality', cls: 'tag-key' },
+        { day: 'Sun', title: 'Long run', note: 'Moved from Saturday — full fuel', tag: 'Long', cls: 'tag-warn' },
       ],
       weekend: [
-        { day: 'Sat', title: 'Match-day easy 30′ AM', note: 'Done before kickoff', tag: 'Z2' },
-        { day: 'Sun', title: 'Long run as planned', note: 'No adjustment needed', tag: 'Long' },
-        { day: 'Mon', title: 'Recovery jog', note: 'Standard week resumes', tag: 'Z1' },
+        { day: 'Sat AM', title: 'Easy 30′ pre-match', note: 'Done before kickoff', tag: 'Z2', cls: 'tag-rest' },
+        { day: 'Sat PM', title: 'Match + halftime protocol', note: '12-min mobility at HT', tag: 'Fan', cls: 'tag-rest' },
+        { day: 'Sun', title: 'Long run as planned', note: 'No volume adjustment', tag: 'Long', cls: 'tag-key' },
+        { day: 'Mon', title: 'Recovery jog 25′', note: 'Standard week resumes', tag: 'Z1', cls: 'tag-rest' },
       ],
       knockout: [
-        { day: 'Pre', title: 'Deload −40% volume', note: '3 days out: one key session max', tag: 'Taper' },
-        { day: 'Match', title: 'Walk + halftime mobility', note: 'No training within 12h of 02:00 KO', tag: 'Rest' },
-        { day: 'Post', title: 'Sleep extension + Z1', note: 'No intervals until HRV normalizes', tag: 'Recovery' },
+        { day: '−3d', title: 'Deload −40% volume', note: 'One key session max before KO', tag: 'Taper', cls: 'tag-warn' },
+        { day: '−1d', title: 'Walk 20′ + stretch', note: 'No training within 12h of 02:00 KO', tag: 'Rest', cls: 'tag-rest' },
+        { day: 'Match', title: 'Halftime protocol only', note: 'No additional training load', tag: 'Fan', cls: 'tag-rest' },
+        { day: '+1d', title: 'Sleep extension + Z1', note: 'No intervals until HRV normalizes', tag: 'Recovery', cls: 'tag-rest' },
+        { day: '+3d', title: 'Easy 30′ test jog', note: 'Assess ATL before resuming plan', tag: 'Z1', cls: 'tag-rest' },
       ],
     };
+
+    let lang = 'en';
+
+    document.querySelectorAll('.lang-toggle button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        lang = btn.dataset.lang;
+        document.querySelectorAll('.lang-toggle button').forEach(b => b.classList.toggle('active', b === btn));
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+          const k = el.dataset.i18n;
+          if (I18N[lang][k]) el.textContent = I18N[lang][k];
+        });
+      });
+    });
+
+    document.getElementById('raceWeeks').addEventListener('input', e => {
+      document.getElementById('raceWeeksVal').textContent = e.target.value + (lang === 'de' ? ' Wo' : ' wk');
+    });
 
     function setMetric(el, val, cls) {
       el.className = 'metric ' + cls;
       el.querySelector('.val').textContent = (val > 0 ? '+' : '') + val;
     }
 
+    function drawChart(curve) {
+      const canvas = document.getElementById('chart');
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, w, h);
+
+      const pad = { t: 10, r: 10, b: 20, l: 30 };
+      const min = Math.min(...curve) - 2, max = 2;
+      const xStep = (w - pad.l - pad.r) / (curve.length - 1);
+
+      ctx.strokeStyle = '#1e2d3d'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(pad.l, h/2); ctx.lineTo(w - pad.r, h/2); ctx.stroke();
+
+      ctx.strokeStyle = '#2dd4bf'; ctx.lineWidth = 2.5; ctx.beginPath();
+      curve.forEach((v, i) => {
+        const x = pad.l + i * xStep;
+        const y = pad.t + (max - v) / (max - min) * (h - pad.t - pad.b);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(45,212,191,.12)';
+      ctx.lineTo(pad.l + (curve.length-1)*xStep, h - pad.b);
+      ctx.lineTo(pad.l, h - pad.b); ctx.closePath(); ctx.fill();
+
+      const days = ['M','T','W','T','F','S','S'];
+      ctx.fillStyle = '#7d92a8'; ctx.font = '10px system-ui'; ctx.textAlign = 'center';
+      days.forEach((d, i) => ctx.fillText(d, pad.l + i*xStep, h - 4));
+    }
+
+    function buildPrompt(nation, match, r, plan, raceWeeks) {
+      const planText = plan.map(p => `  ${p.day}: ${p.title} — ${p.note} [${p.tag}]`).join('\n');
+      return `You are an endurance coach using AiTrainingPlan logic (CTL/ATL/TSB, ACWR injury scoring).
+
+CONTEXT:
+- Athlete supports ${nation} during World Cup 2026
+- Cup Run scenario: ${match}
+- A-race in ${raceWeeks} weeks
+- Projected: CTL ${r.ctl}, ATL +${r.atl}, TSB ${r.tsb}, ACWR ${r.acwr}
+- Injury risk: ${r.injury}
+
+ADJUSTED WEEK (do not add volume):
+${planText}
+
+HALFTIME: 12-min mobility protocol (hip/ankle → glutes → 4-7-8 breathing)
+
+RULES:
+- ACWR must stay ≤ 1.3 during knockout rounds
+- No hard sessions within 12h of 02:00 CET kickoff
+- If A-race < 6 weeks: prioritize TSB over CTL
+
+Refine this plan for my actual Garmin/Strava data. Ask me for this week's CTL, ATL, and sleep avg before changing anything.`;
+    }
+
     document.getElementById('generate').addEventListener('click', () => {
-      const match = document.getElementById('nextMatch').value;
-      const nation = document.getElementById('nation').value;
-      const r = RULES[match];
+      const match = document.getElementById('cupRun').value;
+      const nation = document.getElementById('nation').selectedOptions[0].text;
+      const raceWeeks = document.getElementById('raceWeeks').value;
+      let r = { ...RULES[match] };
       const plan = PLANS[match];
+
+      if (raceWeeks < 6 && match !== 'weekend') {
+        r.ctl -= 1; r.atl += 3; r.tsb -= 4; r.acwr += 0.08;
+        r.insight += ' A-race proximity override: extra deload applied.';
+      }
 
       setMetric(document.getElementById('mCtl'), r.ctl, r.ctl < -3 ? 'warn' : 'ok');
       setMetric(document.getElementById('mAtl'), r.atl, r.atl > 15 ? 'danger' : r.atl > 8 ? 'warn' : 'ok');
       setMetric(document.getElementById('mTsb'), r.tsb, r.tsb < -15 ? 'danger' : r.tsb < -8 ? 'warn' : 'ok');
+      setMetric(document.getElementById('mInj'), 0, r.injury === 'High' ? 'danger' : r.injury === 'Moderate' ? 'warn' : 'ok');
+      document.getElementById('mInj').querySelector('.val').textContent = r.injury;
 
-      const nationLabel = document.getElementById('nation').selectedOptions[0].text;
-      document.getElementById('insight').textContent =
-        nationLabel + ': ' + r.insight + ' ACWR auto-capped at 1.3 during knockout rounds.';
+      const acwrPct = Math.min(100, ((r.acwr - 0.8) / 0.7) * 100);
+      const fill = document.getElementById('acwrFill');
+      fill.style.width = acwrPct + '%';
+      fill.style.background = r.acwr > 1.3 ? 'var(--danger)' : r.acwr > 1.15 ? 'var(--warn)' : 'var(--ok)';
+      document.getElementById('acwrVal').textContent = 'ACWR ' + r.acwr.toFixed(2);
+
+      drawChart(r.curve);
+      document.getElementById('insight').textContent = nation + ': ' + r.insight;
+      document.getElementById('cupRunNote').innerHTML = '<em>Tipmaster sync:</em> ' + r.cup;
 
       document.getElementById('plan').innerHTML = plan.map(p => `
         <div class="plan-item">
-          <span class="plan-time">${p.day}</span>
+          <span class="plan-day">${p.day}</span>
           <div class="plan-body">
-            <h3>${p.title}</h3>
-            <p>${p.note}</p>
-            <span class="tag">${p.tag}</span>
+            <h3>${p.title}</h3><p>${p.note}</p>
+            <span class="tag ${p.cls}">${p.tag}</span>
           </div>
-        </div>
-      `).join('');
+        </div>`).join('');
 
+      document.getElementById('aiPrompt').value = buildPrompt(nation, match, r, plan, raceWeeks);
       document.getElementById('output').classList.remove('hidden');
+      document.getElementById('output').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    document.getElementById('copyPrompt').addEventListener('click', async () => {
+      const ta = document.getElementById('aiPrompt');
+      await navigator.clipboard.writeText(ta.value);
+      const btn = document.getElementById('copyPrompt');
+      btn.textContent = I18N[lang].copied;
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = I18N[lang].btn_copy; btn.classList.remove('copied'); }, 2000);
     });
   </script>
 </body>
