@@ -208,48 +208,66 @@
     }
 
     /* ── custom range ── */
-    .range-wrap { position: relative; padding: 6px 0 2px; }
+    .range-label {
+      display: flex; justify-content: space-between; align-items: center;
+      margin: 14px 0 10px; gap: 12px;
+    }
+    .range-label span:first-child { font-size: .82rem; color: var(--muted); font-weight: 500; }
+    .range-val {
+      font-size: .82rem; color: var(--accent); font-weight: 700; flex-shrink: 0;
+      background: rgba(45,212,191,.1); padding: 4px 10px; border-radius: 8px;
+      border: 1px solid rgba(45,212,191,.2); float: none;
+    }
+    .range-wrap {
+      position: relative; height: 44px; display: flex; align-items: center;
+      --thumb: 11px;
+      padding: 0 var(--thumb); overflow: visible;
+    }
     .range-track-bg {
-      position: absolute; top: 50%; left: 0; right: 0; height: 6px;
-      transform: translateY(-50%); background: var(--card2);
-      border-radius: 6px; border: 1px solid var(--border); pointer-events: none;
+      position: absolute; left: var(--thumb); right: var(--thumb);
+      height: 6px; top: 50%; transform: translateY(-50%);
+      background: var(--card2); border-radius: 6px;
+      border: 1px solid var(--border); pointer-events: none; z-index: 0;
     }
     .range-track-fill {
-      position: absolute; top: 50%; left: 0; height: 6px;
-      transform: translateY(-50%); background: linear-gradient(90deg, var(--accent2), var(--accent));
-      border-radius: 6px; pointer-events: none; width: var(--pct, 35%);
-      transition: width .1s;
+      position: absolute; left: var(--thumb); height: 6px; top: 50%;
+      transform: translateY(-50%);
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      border-radius: 6px; pointer-events: none; z-index: 0;
+      width: 0; max-width: calc(100% - var(--thumb) * 2);
+      transition: width .12s var(--ease-out);
     }
     input[type=range] {
-      -webkit-appearance: none; appearance: none; width: 100%;
-      height: 44px; background: transparent; cursor: pointer; position: relative; z-index: 1;
+      -webkit-appearance: none; appearance: none;
+      width: 100%; height: 44px; background: transparent;
+      cursor: pointer; position: relative; z-index: 2;
       margin: 0; padding: 0;
     }
     input[type=range]:focus { outline: none; }
-    input[type=range]:focus-visible + .range-track-bg,
     .range-wrap:focus-within .range-track-bg {
-      box-shadow: 0 0 0 3px rgba(45,212,191,.12); border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(45,212,191,.1); border-color: rgba(45,212,191,.4);
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      height: 6px; background: transparent; border: none;
     }
     input[type=range]::-webkit-slider-thumb {
       -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%;
       background: linear-gradient(135deg, #fff, #e0fdf8);
-      border: 2px solid var(--accent); box-shadow: 0 2px 10px rgba(45,212,191,.4);
-      cursor: grab; transition: transform .15s var(--ease-spring), box-shadow .15s;
+      border: 2px solid var(--accent); box-shadow: 0 2px 10px rgba(45,212,191,.45);
+      cursor: grab; margin-top: -8px;
+      transition: transform .15s var(--ease-spring), box-shadow .15s;
     }
-    input[type=range]::-webkit-slider-thumb:hover {
-      transform: scale(1.12); box-shadow: 0 4px 16px rgba(45,212,191,.55);
-    }
-    input[type=range]::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.05); }
-    input[type=range]::-webkit-slider-runnable-track { height: 6px; background: transparent; }
+    input[type=range]::-webkit-slider-thumb:active { cursor: grabbing; transform: scale(1.08); }
+    input[type=range]::-moz-range-track { height: 6px; background: transparent; border: none; }
     input[type=range]::-moz-range-thumb {
       width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--accent);
       background: linear-gradient(135deg, #fff, #e0fdf8);
-      box-shadow: 0 2px 10px rgba(45,212,191,.4); cursor: grab;
+      box-shadow: 0 2px 10px rgba(45,212,191,.45); cursor: grab;
     }
-    input[type=range]::-moz-range-track { height: 6px; background: transparent; border: none; }
     .range-ticks {
-      display: flex; justify-content: space-between; margin-top: 4px;
-      font-size: .65rem; color: #4a6278; padding: 0 2px;
+      display: flex; justify-content: space-between; margin-top: 2px;
+      font-size: .65rem; color: #4a6278;
+      padding: 0 var(--thumb, 11px);
     }
 
     /* ── textarea ── */
@@ -270,8 +288,9 @@
     .textarea-field::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
     .range-val {
-      font-size: .82rem; color: var(--accent); font-weight: 700; float: right;
-      background: rgba(45,212,191,.1); padding: 2px 8px; border-radius: 6px;
+      font-size: .82rem; color: var(--accent); font-weight: 700; flex-shrink: 0;
+      background: rgba(45,212,191,.1); padding: 4px 10px; border-radius: 8px;
+      border: 1px solid rgba(45,212,191,.2);
     }
 
     .btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
@@ -610,14 +629,14 @@
         </select>
       </div>
 
-      <label for="raceWeeks">
+      <div class="range-label">
         <span data-i18n="lbl_race">Weeks until A-race</span>
         <span class="range-val" id="raceWeeksVal">8 wk</span>
-      </label>
+      </div>
       <div class="range-wrap" id="rangeWrap">
         <div class="range-track-bg"></div>
         <div class="range-track-fill" id="rangeFill"></div>
-        <input type="range" id="raceWeeks" min="2" max="20" value="8" aria-valuemin="2" aria-valuemax="20" aria-valuenow="8">
+        <input type="range" id="raceWeeks" min="2" max="20" value="8" aria-valuemin="2" aria-valuemax="20" aria-valuenow="8" aria-label="Weeks until A-race">
       </div>
       <div class="range-ticks"><span>2</span><span>8</span><span>14</span><span>20</span></div>
 
@@ -941,9 +960,13 @@
 
     function updateRangeFill() {
       const input = document.getElementById('raceWeeks');
+      const wrap = document.getElementById('rangeWrap');
+      const fill = document.getElementById('rangeFill');
       const min = +input.min, max = +input.max, val = +input.value;
-      const pct = ((val - min) / (max - min)) * 100;
-      document.getElementById('rangeFill').style.width = pct + '%';
+      const pct = (val - min) / (max - min);
+      const thumb = 11;
+      const trackW = wrap.clientWidth - thumb * 2;
+      fill.style.width = Math.max(0, trackW * pct) + 'px';
       input.setAttribute('aria-valuenow', val);
     }
 
@@ -1345,6 +1368,10 @@ Refine this plan for my actual Garmin/Strava data. Ask me for this week's CTL, A
         new ResizeObserver(() => {
           if (lastState) drawChart(lastState.r.curve, lastState.match, chartMeta.activeHit);
         }).observe(cw);
+      }
+      const rw = document.getElementById('rangeWrap');
+      if (rw) {
+        new ResizeObserver(() => updateRangeFill()).observe(rw);
       }
     }
 
