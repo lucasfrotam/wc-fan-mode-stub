@@ -94,7 +94,7 @@
     .acwr-fill { height: 100%; border-radius: 4px; transition: width .4s ease, background .4s; }
     .acwr-label { display: flex; justify-content: space-between; font-size: .75rem; color: var(--muted); margin-top: 4px; }
     .chart-wrap { margin-top: 12px; background: var(--card2); border-radius: 10px; padding: 12px; border: 1px solid var(--border); }
-    canvas { width: 100%; height: 120px; display: block; }
+    canvas { width: 100%; height: 120px; display: block; min-height: 120px; }
     .chart-legend { display: flex; gap: 14px; margin-top: 8px; font-size: .72rem; color: var(--muted); flex-wrap: wrap; }
     .chart-legend span::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
     .leg-tsb::before { background: var(--accent); }
@@ -355,37 +355,106 @@
       el.querySelector('.val').textContent = (val > 0 ? '+' : '') + val;
     }
 
-    function drawChart(curve) {
+    function drawChart(curve, matchType) {
       const canvas = document.getElementById('chart');
       const ctx = canvas.getContext('2d');
       const dpr = window.devicePixelRatio || 1;
-      const w = canvas.clientWidth, h = canvas.clientHeight;
-      canvas.width = w * dpr; canvas.height = h * dpr;
-      ctx.scale(dpr, dpr);
+
+      // Parent was hidden → clientWidth is 0; fall back to wrapper width
+      const wrap = canvas.parentElement;
+      const w = canvas.clientWidth || wrap.clientWidth || 640;
+      const h = 120;
+
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, w, h);
 
-      const pad = { t: 10, r: 10, b: 20, l: 30 };
-      const min = Math.min(...curve) - 2, max = 2;
+      const pad = { t: 14, r: 14, b: 24, l: 34 };
+      const min = Math.min(...curve) - 3;
+      const max = 4;
+      const range = max - min;
       const xStep = (w - pad.l - pad.r) / (curve.length - 1);
 
-      ctx.strokeStyle = '#1e2d3d'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(pad.l, h/2); ctx.lineTo(w - pad.r, h/2); ctx.stroke();
+      const toY = v => pad.t + ((max - v) / range) * (h - pad.t - pad.b);
+      const toX = i => pad.l + i * xStep;
 
-      ctx.strokeStyle = '#2dd4bf'; ctx.lineWidth = 2.5; ctx.beginPath();
+      // grid lines
+      ctx.strokeStyle = '#1a2836';
+      ctx.lineWidth = 1;
+      for (let g = 0; g <= 3; g++) {
+        const y = pad.t + (g / 3) * (h - pad.t - pad.b);
+        ctx.beginPath();
+        ctx.moveTo(pad.l, y);
+        ctx.lineTo(w - pad.r, y);
+        ctx.stroke();
+      }
+
+      // zero line
+      const zeroY = toY(0);
+      ctx.strokeStyle = '#2a3f52';
+      ctx.beginPath();
+      ctx.moveTo(pad.l, zeroY);
+      ctx.lineTo(w - pad.r, zeroY);
+      ctx.stroke();
+
+      // TSB area fill
+      ctx.beginPath();
       curve.forEach((v, i) => {
-        const x = pad.l + i * xStep;
-        const y = pad.t + (max - v) / (max - min) * (h - pad.t - pad.b);
+        const x = toX(i), y = toY(v);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.lineTo(toX(curve.length - 1), h - pad.b);
+      ctx.lineTo(pad.l, h - pad.b);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(45,212,191,.14)';
+      ctx.fill();
+
+      // TSB line
+      ctx.beginPath();
+      ctx.strokeStyle = '#2dd4bf';
+      ctx.lineWidth = 2.5;
+      ctx.lineJoin = 'round';
+      curve.forEach((v, i) => {
+        const x = toX(i), y = toY(v);
         i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
       });
       ctx.stroke();
 
-      ctx.fillStyle = 'rgba(45,212,191,.12)';
-      ctx.lineTo(pad.l + (curve.length-1)*xStep, h - pad.b);
-      ctx.lineTo(pad.l, h - pad.b); ctx.closePath(); ctx.fill();
+      // TSB dots
+      curve.forEach((v, i) => {
+        ctx.beginPath();
+        ctx.arc(toX(i), toY(v), 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#2dd4bf';
+        ctx.fill();
+      });
 
-      const days = ['M','T','W','T','F','S','S'];
-      ctx.fillStyle = '#7d92a8'; ctx.font = '10px system-ui'; ctx.textAlign = 'center';
-      days.forEach((d, i) => ctx.fillText(d, pad.l + i*xStep, h - 4));
+      // ATL spike on match night (day index per scenario)
+      const spikeDay = { weekday_early: 1, weekday_late: 1, weekend: 1, knockout: 2 }[matchType] ?? 1;
+      const spikeVal = curve[spikeDay] - 6;
+      const sx = toX(spikeDay), sy = toY(spikeVal);
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(sx, toY(curve[spikeDay]));
+      ctx.strokeStyle = 'rgba(245,158,11,.6)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 3]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.arc(sx, sy, 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#f59e0b';
+      ctx.fill();
+
+      // day labels
+      const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+      ctx.fillStyle = '#7d92a8';
+      ctx.font = '11px system-ui';
+      ctx.textAlign = 'center';
+      days.forEach((d, i) => ctx.fillText(d, toX(i), h - 6));
     }
 
     function buildPrompt(nation, match, r, plan, raceWeeks) {
@@ -436,7 +505,6 @@ Refine this plan for my actual Garmin/Strava data. Ask me for this week's CTL, A
       fill.style.background = r.acwr > 1.3 ? 'var(--danger)' : r.acwr > 1.15 ? 'var(--warn)' : 'var(--ok)';
       document.getElementById('acwrVal').textContent = 'ACWR ' + r.acwr.toFixed(2);
 
-      drawChart(r.curve);
       document.getElementById('insight').textContent = nation + ': ' + r.insight;
       document.getElementById('cupRunNote').innerHTML = '<em>Tipmaster sync:</em> ' + r.cup;
 
@@ -451,6 +519,13 @@ Refine this plan for my actual Garmin/Strava data. Ask me for this week's CTL, A
 
       document.getElementById('aiPrompt').value = buildPrompt(nation, match, r, plan, raceWeeks);
       document.getElementById('output').classList.remove('hidden');
+
+      // Draw after section is visible — hidden parent gives canvas 0 width
+      requestAnimationFrame(() => {
+        drawChart(r.curve, match);
+        requestAnimationFrame(() => drawChart(r.curve, match));
+      });
+
       document.getElementById('output').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
