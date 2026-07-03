@@ -95,8 +95,19 @@
     .acwr-track { height: 8px; background: var(--card2); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
     .acwr-fill { height: 100%; border-radius: 4px; transition: width .4s ease, background .4s; }
     .acwr-label { display: flex; justify-content: space-between; font-size: .75rem; color: var(--muted); margin-top: 4px; }
-    .chart-wrap { margin-top: 12px; background: var(--card2); border-radius: 10px; padding: 12px; border: 1px solid var(--border); }
-    canvas { width: 100%; height: 120px; display: block; min-height: 120px; }
+    .chart-wrap { margin-top: 12px; background: var(--card2); border-radius: 10px; padding: 12px; border: 1px solid var(--border); position: relative; }
+    canvas { width: 100%; height: 120px; display: block; min-height: 120px; cursor: crosshair; }
+    .chart-tooltip {
+      position: absolute; pointer-events: none; z-index: 5;
+      background: #0a1018; border: 1px solid var(--accent); border-radius: 8px;
+      padding: 8px 11px; font-size: .75rem; line-height: 1.45; color: var(--text);
+      box-shadow: 0 6px 24px rgba(0,0,0,.45); white-space: nowrap;
+      transform: translate(-50%, calc(-100% - 10px)); opacity: 0; transition: opacity .15s;
+    }
+    .chart-tooltip.show { opacity: 1; }
+    .chart-tooltip .tt-day { font-weight: 700; color: var(--accent); display: block; margin-bottom: 2px; }
+    .chart-tooltip .tt-val { color: #b8c9d9; }
+    .chart-tooltip .tt-ko { color: var(--warn); font-weight: 600; }
     .chart-legend { display: flex; gap: 14px; margin-top: 8px; font-size: .72rem; color: var(--muted); flex-wrap: wrap; }
     .chart-legend span::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
     .leg-tsb::before { background: var(--accent); }
@@ -248,6 +259,7 @@
         </div>
         <div class="chart-wrap">
           <canvas id="chart" width="680" height="120"></canvas>
+          <div id="chartTooltip" class="chart-tooltip" role="tooltip"></div>
           <div class="chart-legend">
             <span class="leg-tsb">7-day TSB projection</span>
             <span class="leg-atl">ATL spike on match night</span>
@@ -405,6 +417,17 @@
 
     let lang = 'en';
     let lastState = null;
+    let chartMeta = { curve: [], matchType: '', hits: [], activeHit: -1 };
+
+    const DAY_NAMES = {
+      en: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+      de: ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
+    };
+
+    const FORM_LABEL = {
+      en: v => v >= 0 ? 'Fresh' : v >= -8 ? 'Neutral' : v >= -15 ? 'Fatigued' : 'Overreached',
+      de: v => v >= 0 ? 'Frisch' : v >= -8 ? 'Neutral' : v >= -15 ? 'Müde' : 'Überlastet'
+    };
 
     function toast(msg) {
       const el = document.getElementById('toast');
@@ -465,12 +488,11 @@
       el.querySelector('.val').textContent = (val > 0 ? '+' : '') + val;
     }
 
-    function drawChart(curve, matchType) {
+    function drawChart(curve, matchType, activeHitIdx = -1) {
       const canvas = document.getElementById('chart');
       const ctx = canvas.getContext('2d');
       const dpr = window.devicePixelRatio || 1;
 
-      // Parent was hidden → clientWidth is 0; fall back to wrapper width
       const wrap = canvas.parentElement;
       const w = canvas.clientWidth || wrap.clientWidth || 640;
       const h = 120;
@@ -492,6 +514,8 @@
       const toY = v => pad.t + ((max - v) / range) * (h - pad.t - pad.b);
       const toX = i => pad.l + i * xStep;
 
+      chartMeta = { curve, matchType, hits: [], activeHit: activeHitIdx, w, h };
+
       // grid lines
       ctx.strokeStyle = '#1a2836';
       ctx.lineWidth = 1;
@@ -503,7 +527,6 @@
         ctx.stroke();
       }
 
-      // zero line
       const zeroY = toY(0);
       ctx.strokeStyle = '#2a3f52';
       ctx.beginPath();
@@ -534,40 +557,126 @@
       });
       ctx.stroke();
 
-      // TSB dots
+      const spikeDay = { weekday_early: 1, weekday_late: 1, weekend: 1, knockout: 2 }[matchType] ?? 1;
+
+      // TSB dots + hit areas
       curve.forEach((v, i) => {
+        const x = toX(i), y = toY(v);
+        const hitIdx = chartMeta.hits.length;
+        chartMeta.hits.push({ x, y, i, type: 'tsb', tsb: v });
+
+        const isActive = activeHitIdx === hitIdx;
+        const radius = isActive ? 7 : 3.5;
+
+        if (isActive) {
+          ctx.beginPath();
+          ctx.arc(x, y, 12, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(45,212,191,.2)';
+          ctx.fill();
+        }
         ctx.beginPath();
-        ctx.arc(toX(i), toY(v), 3.5, 0, Math.PI * 2);
-        ctx.fillStyle = '#2dd4bf';
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = isActive ? '#5eead4' : '#2dd4bf';
         ctx.fill();
+        if (isActive) {
+          ctx.strokeStyle = '#fff';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
       });
 
-      // ATL spike on match night (day index per scenario)
-      const spikeDay = { weekday_early: 1, weekday_late: 1, weekend: 1, knockout: 2 }[matchType] ?? 1;
+      // ATL spike on match night
       const spikeVal = curve[spikeDay] - 6;
       const sx = toX(spikeDay), sy = toY(spikeVal);
+      const koHitIdx = chartMeta.hits.length;
+      chartMeta.hits.push({ x: sx, y: sy, i: spikeDay, type: 'ko', tsb: curve[spikeDay], atlDelta: 6 });
+
+      const koActive = activeHitIdx === koHitIdx;
       ctx.beginPath();
       ctx.moveTo(sx, sy);
       ctx.lineTo(sx, toY(curve[spikeDay]));
-      ctx.strokeStyle = 'rgba(245,158,11,.6)';
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = koActive ? 'rgba(245,158,11,.9)' : 'rgba(245,158,11,.6)';
+      ctx.lineWidth = koActive ? 2.5 : 2;
       ctx.setLineDash([4, 3]);
       ctx.stroke();
       ctx.setLineDash([]);
+
+      if (koActive) {
+        ctx.beginPath();
+        ctx.arc(sx, sy, 14, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(245,158,11,.2)';
+        ctx.fill();
+      }
       ctx.beginPath();
-      ctx.arc(sx, sy, 5, 0, Math.PI * 2);
-      ctx.fillStyle = '#f59e0b';
+      ctx.arc(sx, sy, koActive ? 7 : 5, 0, Math.PI * 2);
+      ctx.fillStyle = koActive ? '#fbbf24' : '#f59e0b';
       ctx.fill();
       ctx.fillStyle = '#f59e0b';
       ctx.font = 'bold 9px system-ui';
-      ctx.fillText('KO', sx, sy - 10);
+      ctx.textAlign = 'center';
+      ctx.fillText('KO', sx, sy - (koActive ? 12 : 10));
 
-      // day labels
       const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
       ctx.fillStyle = '#7d92a8';
       ctx.font = '11px system-ui';
-      ctx.textAlign = 'center';
       days.forEach((d, i) => ctx.fillText(d, toX(i), h - 6));
+    }
+
+    function showChartTooltip(hitIdx, canvasX, canvasY) {
+      const tip = document.getElementById('chartTooltip');
+      if (hitIdx < 0) {
+        tip.classList.remove('show');
+        return;
+      }
+      const hit = chartMeta.hits[hitIdx];
+      const day = DAY_NAMES[lang][hit.i];
+      const form = FORM_LABEL[lang](hit.tsb);
+      const tsbStr = (hit.tsb > 0 ? '+' : '') + hit.tsb;
+
+      if (hit.type === 'ko') {
+        tip.innerHTML = `<span class="tt-day">${day} · ${lang === 'de' ? 'Spielabend' : 'Match night'}</span>
+          <span class="tt-ko">ATL spike +${hit.atlDelta}</span><br>
+          <span class="tt-val">TSB ${tsbStr} · ${lang === 'de' ? 'Form' : 'Form'}: ${form}</span>`;
+      } else {
+        tip.innerHTML = `<span class="tt-day">${day}</span>
+          <span class="tt-val">TSB ${tsbStr} · ${lang === 'de' ? 'Form' : 'Form'}: ${form}</span>`;
+      }
+
+      const wrap = tip.parentElement;
+      const wrapRect = wrap.getBoundingClientRect();
+      tip.style.left = canvasX + 'px';
+      tip.style.top = (canvasY - 8) + 'px';
+      tip.classList.add('show');
+    }
+
+    function bindChartHover() {
+      const canvas = document.getElementById('chart');
+      if (canvas._bound) return;
+      canvas._bound = true;
+
+      canvas.addEventListener('mousemove', e => {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        let best = -1, bestD = 20;
+
+        chartMeta.hits.forEach((h, idx) => {
+          const d = Math.hypot(mx - h.x, my - h.y);
+          if (d < bestD) { bestD = d; best = idx; }
+        });
+
+        if (best !== chartMeta.activeHit) {
+          chartMeta.activeHit = best;
+          drawChart(chartMeta.curve, chartMeta.matchType, best);
+        }
+        showChartTooltip(best, mx, my);
+      });
+
+      canvas.addEventListener('mouseleave', () => {
+        chartMeta.activeHit = -1;
+        drawChart(chartMeta.curve, chartMeta.matchType, -1);
+        document.getElementById('chartTooltip').classList.remove('show');
+      });
     }
 
     function buildPrompt(nation, match, r, plan, raceWeeks) {
@@ -636,7 +745,7 @@ Refine this plan for my actual Garmin/Strava data. Ask me for this week's CTL, A
 
       try { localStorage.setItem('wcFanMode', JSON.stringify(getState())); } catch (_) {}
 
-      const draw = () => drawChart(r.curve, match);
+      const draw = () => { drawChart(r.curve, match); bindChartHover(); };
       requestAnimationFrame(() => { draw(); requestAnimationFrame(draw); });
 
       if (scroll) document.getElementById('output').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -668,7 +777,7 @@ Refine this plan for my actual Garmin/Strava data. Ask me for this week's CTL, A
     });
 
     window.addEventListener('resize', () => {
-      if (lastState) drawChart(lastState.r.curve, lastState.match);
+      if (lastState) drawChart(lastState.r.curve, lastState.match, chartMeta.activeHit);
     });
 
     document.addEventListener('keydown', e => {
