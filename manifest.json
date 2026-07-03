@@ -1,0 +1,12 @@
+{
+  "name": "World Cup Fan Mode",
+  "short_name": "WC Fan Mode",
+  "description": "Adaptive training around World Cup 2026 match nights — AiTrainingPlan feature stub",
+  "start_url": "/wc-fan-mode-stub/",
+  "display": "standalone",
+  "background_color": "#080c10",
+  "theme_color": "#080c10",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

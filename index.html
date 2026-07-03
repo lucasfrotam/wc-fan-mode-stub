@@ -13,6 +13,8 @@
   <meta property="og:description" content="Reschedule endurance training around WC 2026 match nights. ACWR, TSB chart, Portable AI Coach prompt.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://lucasfrotam.github.io/wc-fan-mode-stub/">
+  <meta property="og:image" content="https://lucasfrotam.github.io/wc-fan-mode-stub/social-card.svg">
+  <link rel="manifest" href="manifest.json">
   <style>
     :root {
       --bg: #080c10;
@@ -131,6 +133,39 @@
     footer a { color: var(--accent); text-decoration: none; }
     footer a:hover { text-decoration: underline; }
     .hidden { display: none; }
+    .compare { width: 100%; border-collapse: collapse; font-size: .8rem; margin-top: 4px; }
+    .compare th, .compare td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; vertical-align: top; }
+    .compare th { background: var(--card2); color: var(--muted); font-weight: 600; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
+    .compare td:first-child { color: var(--muted); font-weight: 600; width: 28%; }
+    .compare .yes { color: var(--ok); }
+    .compare .no { color: #5a6d80; }
+    .compare .partial { color: var(--warn); }
+    details.roadmap summary {
+      cursor: pointer; font-size: .78rem; text-transform: uppercase; letter-spacing: .07em;
+      color: var(--muted); font-weight: 600; list-style: none; display: flex; align-items: center; gap: 8px;
+    }
+    details.roadmap summary::before { content: ""; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+    details.roadmap summary::after { content: "▾"; margin-left: auto; color: var(--accent); }
+    details.roadmap[open] summary::after { transform: rotate(180deg); }
+    details.roadmap { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 14px; }
+    .roadmap ol { margin: 14px 0 0 18px; font-size: .86rem; color: #a8bccf; }
+    .roadmap li { margin-bottom: 8px; }
+    .roadmap li strong { color: var(--text); }
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--card); border: 1px solid var(--accent); color: var(--text);
+      padding: 10px 18px; border-radius: 10px; font-size: .85rem; z-index: 99;
+      opacity: 0; transition: transform .3s ease, opacity .3s ease; pointer-events: none;
+      box-shadow: 0 8px 32px rgba(0,0,0,.4);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    #output .card { animation: fadeUp .45s ease both; }
+    #output .card:nth-child(2) { animation-delay: .06s; }
+    #output .card:nth-child(3) { animation-delay: .12s; }
+    #output .card:nth-child(4) { animation-delay: .18s; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .ver { font-size: .68rem; color: #4a5d70; margin-top: 6px; }
   </style>
 </head>
 <body>
@@ -151,6 +186,20 @@
     <div class="why">
       <strong data-i18n="why_label">Product judgement:</strong>
       <span data-i18n="why_text"> Tipmaster owns predictions; AiTrainingPlan owns the body. Overlap audience = German football fans who also run marathons. Neither product addresses tournament-month training disruption — this feature stub fills that gap without copying either UI.</span>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="compare_title">Who does what</h2>
+      <table class="compare">
+        <thead><tr><th></th><th>tipmaster.de</th><th>aitrainingplan.app</th><th>This stub</th></tr></thead>
+        <tbody>
+          <tr><td>Match predictions</td><td class="yes">✓ Core</td><td class="no">—</td><td class="no">—</td></tr>
+          <tr><td>CTL/ATL/TSB coaching</td><td class="no">—</td><td class="yes">✓ Core</td><td class="yes">✓ Projected</td></tr>
+          <tr><td>Cup Run calendar</td><td class="yes">✓ 12 runs</td><td class="no">—</td><td class="yes">✓ Input signal</td></tr>
+          <tr><td>Tournament sleep/load</td><td class="no">—</td><td class="partial">~ Adaptive</td><td class="yes">✓ Explicit</td></tr>
+          <tr><td>Portable AI prompt</td><td class="no">—</td><td class="yes">✓ Core</td><td class="yes">✓ Export</td></tr>
+        </tbody>
+      </table>
     </div>
 
     <div class="card">
@@ -180,6 +229,7 @@
 
       <div class="btn-row">
         <button type="button" class="btn-primary" id="generate" data-i18n="btn_gen">Generate adjusted week</button>
+        <button type="button" class="btn-secondary" id="shareLink" data-i18n="btn_share">Copy share link</button>
       </div>
     </div>
 
@@ -234,17 +284,31 @@
         <textarea id="aiPrompt" readonly></textarea>
         <div class="btn-row">
           <button type="button" class="btn-secondary" id="copyPrompt" data-i18n="btn_copy">Copy prompt</button>
+          <button type="button" class="btn-secondary" id="copyPlan" data-i18n="btn_copy_plan">Copy plan as markdown</button>
         </div>
       </div>
     </div>
+
+    <details class="roadmap">
+      <summary data-i18n="roadmap_title">Integration roadmap (if shipped to production)</summary>
+      <ol>
+        <li><strong>Phase 1 — Stub (today):</strong> Cup Run → load rules → Portable Prompt. Zero backend.</li>
+        <li><strong>Phase 2 — Data:</strong> Garmin/Strava OAuth reads real CTL/ATL; replace projections with live metrics.</li>
+        <li><strong>Phase 3 — Sync:</strong> Tipmaster kickoff webhook triggers auto-reschedule in AiTrainingPlan dashboard.</li>
+        <li><strong>Phase 4 — Notify:</strong> Halftime push + "match ends in 30′ — wind-down protocol" on Apple Watch.</li>
+        <li><strong>Phase 5 — Cross-sell:</strong> Tipmaster "coach's bench" CTA → AiTrainingPlan WM-Fan-Modus for DACH users.</li>
+      </ol>
+    </details>
 
     <footer>
       <a href="https://aitrainingplan.app" target="_blank" rel="noopener">aitrainingplan.app</a> assessment ·
       <a href="https://tipmaster.de/world-cup/" target="_blank" rel="noopener">tipmaster.de World Cup</a> ·
       <a href="https://github.com/lucasfrotam/wc-fan-mode-stub" target="_blank" rel="noopener">GitHub</a> ·
       <a href="https://github.com/lucasfrotam/wc-fan-mode-stub#readme" target="_blank" rel="noopener">README</a>
+      <div class="ver">v1.3 · single-file · no build step · Lucas Marinho · WTF Assessment 2026</div>
     </footer>
   </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script>
     const I18N = {
@@ -261,7 +325,10 @@
         ht3t: 'Breathing reset', ht3d: '4-7-8 × 6 rounds. Dampens cortisol from high-stakes match stress.',
         prompt_title: 'Portable AI Coach Prompt',
         prompt_desc: 'Mirrors AiTrainingPlan\'s portable-prompt workflow — paste into ChatGPT, Claude, or Gemini.',
-        btn_copy: 'Copy prompt', copied: 'Copied ✓'
+        btn_copy: 'Copy prompt', copied: 'Copied ✓',
+        btn_share: 'Copy share link', btn_copy_plan: 'Copy plan as markdown',
+        compare_title: 'Who does what', roadmap_title: 'Integration roadmap (if shipped to production)',
+        toast_share: 'Share link copied', toast_plan: 'Plan copied', toast_prompt: 'Prompt copied'
       },
       de: {
         title: 'WM-Fan-Modus',
@@ -276,7 +343,10 @@
         ht3t: 'Atem-Reset', ht3d: '4-7-8 × 6 Runden. Senkt Cortisol nach Spielstress.',
         prompt_title: 'Portable AI Coach Prompt',
         prompt_desc: 'Wie AiTrainingPlan — in ChatGPT, Claude oder Gemini einfügen.',
-        btn_copy: 'Prompt kopieren', copied: 'Kopiert ✓'
+        btn_copy: 'Prompt kopieren', copied: 'Kopiert ✓',
+        btn_share: 'Link teilen', btn_copy_plan: 'Plan als Markdown',
+        compare_title: 'Wer macht was', roadmap_title: 'Integrations-Roadmap (Produktion)',
+        toast_share: 'Link kopiert', toast_plan: 'Plan kopiert', toast_prompt: 'Prompt kopiert'
       }
     };
 
@@ -334,6 +404,46 @@
     };
 
     let lang = 'en';
+    let lastState = null;
+
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => el.classList.remove('show'), 2200);
+    }
+
+    function getState() {
+      return {
+        nation: document.getElementById('nation').value,
+        cupRun: document.getElementById('cupRun').value,
+        raceWeeks: document.getElementById('raceWeeks').value,
+        lang
+      };
+    }
+
+    function applyState(s) {
+      if (!s) return;
+      if (s.nation) document.getElementById('nation').value = s.nation;
+      if (s.cupRun) document.getElementById('cupRun').value = s.cupRun;
+      if (s.raceWeeks) {
+        document.getElementById('raceWeeks').value = s.raceWeeks;
+        document.getElementById('raceWeeksVal').textContent = s.raceWeeks + (lang === 'de' ? ' Wo' : ' wk');
+      }
+    }
+
+    function buildShareUrl() {
+      const s = getState();
+      const u = new URL(location.href);
+      u.search = new URLSearchParams(s).toString();
+      return u.toString();
+    }
+
+    function planToMarkdown(nation, plan, r) {
+      const rows = plan.map(p => `| ${p.day} | ${p.title} | ${p.note} | ${p.tag} |`).join('\n');
+      return `# World Cup Fan Mode — ${nation}\n\n**Load:** CTL ${r.ctl} · ATL +${r.atl} · TSB ${r.tsb} · ACWR ${r.acwr}\n\n| Day | Session | Note | Tag |\n|-----|---------|------|-----|\n${rows}`;
+    }
 
     document.querySelectorAll('.lang-toggle button').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -448,6 +558,9 @@
       ctx.arc(sx, sy, 5, 0, Math.PI * 2);
       ctx.fillStyle = '#f59e0b';
       ctx.fill();
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = 'bold 9px system-ui';
+      ctx.fillText('KO', sx, sy - 10);
 
       // day labels
       const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -481,10 +594,10 @@ RULES:
 Refine this plan for my actual Garmin/Strava data. Ask me for this week's CTL, ATL, and sleep avg before changing anything.`;
     }
 
-    document.getElementById('generate').addEventListener('click', () => {
+    function runGenerate(scroll = true) {
       const match = document.getElementById('cupRun').value;
       const nation = document.getElementById('nation').selectedOptions[0].text;
-      const raceWeeks = document.getElementById('raceWeeks').value;
+      const raceWeeks = +document.getElementById('raceWeeks').value;
       let r = { ...RULES[match] };
       const plan = PLANS[match];
 
@@ -519,24 +632,56 @@ Refine this plan for my actual Garmin/Strava data. Ask me for this week's CTL, A
 
       document.getElementById('aiPrompt').value = buildPrompt(nation, match, r, plan, raceWeeks);
       document.getElementById('output').classList.remove('hidden');
+      lastState = { nation, match, r, plan, raceWeeks };
 
-      // Draw after section is visible — hidden parent gives canvas 0 width
-      requestAnimationFrame(() => {
-        drawChart(r.curve, match);
-        requestAnimationFrame(() => drawChart(r.curve, match));
-      });
+      try { localStorage.setItem('wcFanMode', JSON.stringify(getState())); } catch (_) {}
 
-      document.getElementById('output').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const draw = () => drawChart(r.curve, match);
+      requestAnimationFrame(() => { draw(); requestAnimationFrame(draw); });
+
+      if (scroll) document.getElementById('output').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    document.getElementById('generate').addEventListener('click', () => runGenerate(true));
+
+    document.getElementById('shareLink').addEventListener('click', async () => {
+      const url = buildShareUrl();
+      history.replaceState(null, '', url);
+      await navigator.clipboard.writeText(url);
+      toast(I18N[lang].toast_share);
     });
 
     document.getElementById('copyPrompt').addEventListener('click', async () => {
-      const ta = document.getElementById('aiPrompt');
-      await navigator.clipboard.writeText(ta.value);
+      await navigator.clipboard.writeText(document.getElementById('aiPrompt').value);
       const btn = document.getElementById('copyPrompt');
       btn.textContent = I18N[lang].copied;
       btn.classList.add('copied');
+      toast(I18N[lang].toast_prompt);
       setTimeout(() => { btn.textContent = I18N[lang].btn_copy; btn.classList.remove('copied'); }, 2000);
     });
+
+    document.getElementById('copyPlan').addEventListener('click', async () => {
+      if (!lastState) return;
+      const md = planToMarkdown(lastState.nation, lastState.plan, lastState.r);
+      await navigator.clipboard.writeText(md);
+      toast(I18N[lang].toast_plan);
+    });
+
+    window.addEventListener('resize', () => {
+      if (lastState) drawChart(lastState.r.curve, lastState.match);
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && document.activeElement.tagName !== 'TEXTAREA') runGenerate(true);
+    });
+
+    (function init() {
+      const params = Object.fromEntries(new URLSearchParams(location.search));
+      let saved = null;
+      try { saved = JSON.parse(localStorage.getItem('wcFanMode')); } catch (_) {}
+      applyState({ ...saved, ...params });
+      if (params.cupRun || params.nation || saved) runGenerate(false);
+    })();
   </script>
 </body>
 </html>

@@ -45,6 +45,11 @@ This stub fills the gap **without cloning either UI** — it borrows Tipmaster's
 - **Halftime protocol** — 12-min mobility block (counter 90′ seated posture)
 - **Portable AI Coach Prompt** — structured prompt for ChatGPT / Claude / Gemini
 - **EN / DE toggle** — DACH market localization
+- **Comparison table** — Tipmaster vs AiTrainingPlan vs this stub (product judgement)
+- **Share link** — URL params + localStorage persist state (`?nation=germany&cupRun=weekday_late&raceWeeks=8`)
+- **Copy plan as markdown** — portable output for coaches / Notion
+- **Integration roadmap** — 5-phase production path with Tipmaster cross-sell
+- **PWA manifest** + **OG social card** for link previews
 
 ---
 
@@ -114,9 +119,11 @@ Or open `index.html` directly in a browser (clipboard API requires HTTPS or loca
 
 ```
 wc-fan-mode-stub/
-├── index.html      # entire app (UI + logic + styles)
-├── favicon.svg     # tab icon
-└── README.md       # this file
+├── index.html       # entire app (UI + logic + styles)
+├── favicon.svg      # tab icon
+├── social-card.svg  # Open Graph preview image
+├── manifest.json    # PWA metadata
+└── README.md        # this file
 ```
 
 ---

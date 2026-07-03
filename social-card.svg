@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#080c10"/>
+  <rect x="60" y="60" width="1080" height="510" rx="24" fill="#111820" stroke="#2dd4bf" stroke-width="2" opacity=".9"/>
+  <text x="100" y="150" fill="#2dd4bf" font-family="system-ui,sans-serif" font-size="28" font-weight="700" letter-spacing="4">AITRAININGPLAN · FEATURE STUB</text>
+  <text x="100" y="240" fill="#edf2f7" font-family="system-ui,sans-serif" font-size="64" font-weight="800">World Cup Fan Mode</text>
+  <text x="100" y="310" fill="#7d92a8" font-family="system-ui,sans-serif" font-size="30">Reschedule training around WC 2026 match nights</text>
+  <path d="M100 380 H700" stroke="#1e2d3d" stroke-width="2"/>
+  <text x="100" y="430" fill="#4ade80" font-family="system-ui,sans-serif" font-size="26">ACWR gauge · TSB chart · Portable AI prompt</text>
+  <text x="100" y="480" fill="#7d92a8" font-family="system-ui,sans-serif" font-size="22">Built for aitrainingplan.app · Inspired by tipmaster.de</text>
+  <circle cx="980" cy="315" r="120" fill="none" stroke="#2dd4bf" stroke-width="3" opacity=".3"/>
+  <path d="M920 360 Q980 250 1040 360" fill="none" stroke="#2dd4bf" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="980" cy="290" r="18" fill="#2dd4bf"/>
+</svg>
